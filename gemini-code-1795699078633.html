@@ -1,0 +1,3922 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0c0f17">
+<title>HybridEngine Studio Ultimate — 2D Parkour AI, Bosses, BGM &amp; Lua Game Engine</title>
+<link rel="icon" href="data:image/svg+xml,&lt;svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'&gt;&lt;rect width='64' height='64' rx='14' fill='%233b82f6'/&gt;&lt;text x='32' y='44' font-size='34' font-family='system-ui' font-weight='900' fill='white' text-anchor='middle'&gt;H&lt;/text&gt;&lt;/svg&gt;">
+<script src="https://cdn.jsdelivr.net/npm/fengari-web@0.1.4/dist/fengari-web.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+  html,body{width:100%;height:100%;background:#080a0e;color:#f8fafc;overflow:hidden;user-select:none}
+  body{display:flex;flex-direction:column}
+  ::-webkit-scrollbar{width:6px;height:6px}
+  ::-webkit-scrollbar-track{background:#0a0d14}
+  ::-webkit-scrollbar-thumb{background:#263044;border-radius:3px}
+
+  .btn{padding:6px 10px;border-radius:6px;border:1px solid #263044;background:#131824;color:#e2e8f0;font-size:12px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:.12s;white-space:nowrap}
+  .btn:hover{border-color:#3b82f6;background:#1c2436}
+  .btn:disabled{opacity:.42;cursor:not-allowed}
+  .btn.on{background:rgba(59,130,246,.24);border-color:#3b82f6;color:#60a5fa}
+  .blue{background:#3b82f6;border-color:#3b82f6;color:#fff}
+  .blue:hover{background:#2563eb}
+  .green{background:#10b981;border-color:#10b981;color:#052e16;font-weight:700}
+  .green:hover{background:#059669;color:#fff}
+  .red{background:#ef4444;border-color:#ef4444;color:#fff}
+  .red:hover{background:#dc2626}
+  .purple{background:#8b5cf6;border-color:#8b5cf6;color:#fff}
+  .purple:hover{background:#7c3aed}
+  .amber{background:#f59e0b;border-color:#f59e0b;color:#1e1b08;font-weight:700}
+  .amber:hover{background:#d97706;color:#fff}
+  input,select{background:#131824;border:1px solid #263044;color:#f8fafc;padding:5px 8px;border-radius:5px;font-size:12px;outline:none}
+  input:focus,select:focus{border-color:#3b82f6}
+
+  /* Main Menu Hub */
+  #hub{display:flex;flex-direction:column;height:100%}
+  .banner{height:68px;background:linear-gradient(90deg,#0d111a,#151d2e,#0d111a);border-bottom:1px solid #1e2636;padding:0 24px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .title{font-size:24px;font-weight:800;letter-spacing:-.3px}.title span{color:#60a5fa}
+  .hub-main{flex:1;display:flex;overflow:hidden}
+  .hub-side{width:268px;background:#0c0f17;border-right:1px solid #1e2636;padding:20px 14px;display:flex;flex-direction:column;gap:8px}
+  .hnav{padding:12px 14px;border-radius:8px;color:#94a3b8;cursor:pointer;font-weight:600;font-size:13px;transition:.12s}
+  .hnav.on,.hnav:hover{background:rgba(59,130,246,.15);color:#60a5fa}
+  .hub-body{flex:1;padding:28px;overflow-y:auto}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:18px;margin-top:18px}
+  .card{background:#111622;border:1px solid #1e2636;border-radius:10px;padding:18px;display:flex;flex-direction:column;gap:10px;transition:.15s}
+  .card:hover{border-color:#3b82f6;transform:translateY(-2px)}
+  .card-actions{display:flex;gap:8px;margin-top:4px}
+
+  /* Editor Shell */
+  #ed{display:none;flex-direction:column;height:100%}
+  .top{height:48px;background:#0c0f17;border-bottom:1px solid #1e2636;padding:0 12px;display:flex;align-items:center;justify-content:space-between;gap:8px;overflow-x:auto}
+  .work{flex:1;display:flex;overflow:hidden}
+  .left{width:258px;background:#0c0f17;border-right:1px solid #1e2636;display:flex;flex-direction:column}
+  .right{width:296px;background:#0c0f17;border-left:1px solid #1e2636;padding:12px;overflow-y:auto}
+  .phead{height:32px;padding:0 10px;border-bottom:1px solid #1e2636;display:flex;align-items:center;justify-content:space-between;font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.4px}
+  .addg{padding:8px;display:grid;grid-template-columns:1fr 1fr;gap:5px;border-bottom:1px solid #1e2636;max-height:245px;overflow-y:auto}
+  .titem{padding:7px 10px;font-size:12.5px;color:#cbd5e1;cursor:pointer;display:flex;justify-content:space-between;align-items:center;border-left:2px solid transparent}
+  .titem:hover{background:#131824}
+  .titem.sel{background:rgba(59,130,246,.2);color:#60a5fa;font-weight:600;border-left-color:#3b82f6}
+  .badge{font-size:9px;padding:1px 5px;border-radius:3px;margin-left:4px;font-weight:700}
+  .lua-badge{background:rgba(59,130,246,.25);color:#93c5fd}
+  .grav-badge{background:rgba(16,185,129,.22);color:#6ee7b7}
+
+  .mid{flex:1;display:flex;flex-direction:column;overflow:hidden}
+  .vwrap{flex:1;position:relative;background:#07090d;overflow:hidden}
+  #vp{width:100%;height:100%;display:block;outline:none}
+  .hud{position:absolute;top:8px;left:8px;background:rgba(12,15,23,.92);border:1px solid #1e2636;padding:5px 10px;border-radius:5px;font-size:11px;color:#94a3b8;pointer-events:none;z-index:5}
+  .vtools{position:absolute;top:8px;right:8px;display:flex;gap:5px;z-index:5;flex-wrap:wrap;justify-content:flex-end}
+
+  /* Viewport Overlays & Dialogue Box */
+  .vp-overlay{display:none;position:absolute;inset:0;background:rgba(7,9,13,.86);backdrop-filter:blur(4px);z-index:20;flex-direction:column;align-items:center;justify-content:center;gap:14px}
+  .vp-overlay.open{display:flex}
+  .ov-title{font-size:42px;font-weight:900;letter-spacing:2px}
+  #dialogue-ui{display:none;position:absolute;left:24px;right:24px;bottom:20px;background:rgba(12,15,23,.96);border:2px solid #3b82f6;border-radius:10px;padding:14px 18px;z-index:18;flex-direction:column;gap:6px;box-shadow:0 8px 30px rgba(0,0,0,.7)}
+  #dialogue-ui.open{display:flex}
+
+  /* Bottom Drawer */
+  .drawer{height:204px;background:#0c0f17;border-top:1px solid #1e2636;display:flex;flex-direction:column}
+  .dtabs{height:34px;border-bottom:1px solid #1e2636;padding:0 12px;display:flex;align-items:center;justify-content:space-between;gap:8px;overflow-x:auto}
+  .dtab-list{display:flex;gap:14px}
+  .dtab{font-size:12px;font-weight:600;color:#64748b;cursor:pointer;padding:7px 0;border-bottom:2px solid transparent;white-space:nowrap}
+  .dtab.on{color:#60a5fa;border-bottom-color:#3b82f6}
+  .dbody{flex:1;padding:10px;overflow-y:auto}
+  .agrid{display:flex;gap:10px;flex-wrap:wrap}
+  .acard{position:relative;width:96px;background:#131824;border:1px solid #263044;border-radius:7px;padding:6px;text-align:center;cursor:pointer;transition:.12s}
+  .acard:hover,.acard.on{border-color:#3b82f6;background:#1a2234}
+  .acard img{width:44px;height:44px;image-rendering:pixelated;object-fit:contain;background:#080a0e;display:block;margin:0 auto 4px}
+  .adel{position:absolute;top:4px;right:4px;width:18px;height:18px;border-radius:4px;border:1px solid #7f1d1d;background:#ef4444;color:#fff;font-size:10px;font-weight:800;line-height:1;cursor:pointer;display:grid;place-items:center;opacity:.88}
+  .adel:hover{opacity:1;transform:scale(1.08)}
+  .row{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;font-size:12px;color:#94a3b8}
+  .row input,.row select{width:142px}
+  .sec{border-top:1px solid #1e2636;padding-top:9px;margin-top:9px}
+
+  /* BGM Sequencer Grid */
+  .seq-row{display:flex;align-items:center;gap:4px;margin-bottom:5px}
+  .seq-step{width:26px;height:24px;border-radius:4px;border:1px solid #263044;background:#131824;color:#94a3b8;font-size:10px;font-weight:700;cursor:pointer;display:grid;place-items:center}
+  .seq-step.on{background:#3b82f6;border-color:#60a5fa;color:#fff}
+  .seq-step.bass.on{background:#10b981;border-color:#6ee7b7;color:#052e16}
+  .seq-step.playhead{outline:2px solid #fde047}
+
+  /* Modals */
+  .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:99;align-items:center;justify-content:center}
+  .modal.open{display:flex}
+  .npwin{width:520px;max-width:92vw;background:#0c0f17;border:1px solid #2a354d;border-radius:10px;overflow:hidden;display:flex;flex-direction:column}
+  .npbody{padding:18px;display:flex;flex-direction:column;gap:10px}
+  .tpl-opt{background:#131824;border:1px solid #263044;border-radius:8px;padding:10px 12px;cursor:pointer;display:flex;flex-direction:column;gap:3px}
+  .tpl-opt.on{border-color:#3b82f6;background:rgba(59,130,246,.14)}
+
+  .pxwin{width:920px;max-width:96vw;height:560px;background:#0c0f17;border:1px solid #2a354d;border-radius:10px;display:flex;flex-direction:column;overflow:hidden}
+  .pxtop{height:44px;background:#111622;border-bottom:1px solid #1e2636;padding:0 14px;display:flex;align-items:center;justify-content:space-between}
+  .pxmid{flex:1;display:flex;overflow:hidden}
+  .pxtools{width:210px;border-right:1px solid #1e2636;padding:10px;display:flex;flex-direction:column;gap:6px;overflow-y:auto}
+  .pxarea{flex:1;display:grid;place-items:center;background:#07090d}
+  #pxc{background:#131824;border:2px solid #2a354d;cursor:crosshair;image-rendering:pixelated}
+  .pxprev{width:205px;border-left:1px solid #1e2636;padding:10px;display:flex;flex-direction:column;gap:7px;overflow-y:auto}
+  #animc{width:112px;height:112px;margin:0 auto;background:#07090d;border:1px solid #263044;image-rendering:pixelated}
+  .pxtime{height:96px;background:#0a0d14;border-top:1px solid #1e2636;padding:8px 12px;display:flex;flex-direction:column;gap:6px}
+  .fstrip{display:flex;gap:8px;overflow-x:auto}
+  .fbox{width:48px;height:48px;border:2px solid #263044;border-radius:5px;cursor:pointer;display:grid;place-items:center;background:#131824;flex-shrink:0}
+  .fbox.on{border-color:#3b82f6}
+  .fbox canvas{width:40px;height:40px;image-rendering:pixelated}
+
+  /* Lua Script Editor Window */
+  .scwin{width:900px;max-width:96vw;height:560px;background:#0c0f17;border:1px solid #2a354d;border-radius:10px;display:flex;flex-direction:column;overflow:hidden}
+  .scbody{flex:1;display:flex;overflow:hidden}
+  .scside{width:254px;border-right:1px solid #1e2636;padding:10px;display:flex;flex-direction:column;gap:5px;background:#0a0d14;overflow-y:auto}
+  #sccode{flex:1;background:#07090d;color:#e2e8f0;border:none;padding:14px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13px;line-height:1.55;resize:none;outline:none;user-select:text;tab-size:2}
+  .scerr{padding:8px 14px;background:#1e1014;color:#f87171;font-family:monospace;font-size:11.5px;border-top:1px solid #3f1d24;display:none}
+  .api-pill{background:#131824;border:1px solid #263044;color:#93c5fd;padding:3px 6px;border-radius:4px;font-family:monospace;font-size:10.5px;cursor:pointer;text-align:left}
+  .api-pill:hover{border-color:#3b82f6;background:#1c2436}
+</style>
+</head>
+<body>
+
+<!-- 1. MAIN MENU HUB -->
+<div id="hub">
+  <div class="banner">
+    <div class="title">Hybrid<span>Engine</span> <small style="font-size:12px;color:#64748b">ULTIMATE 2D PARKOUR AI, BOSSES, BGM &amp; LUA STUDIO</small></div>
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+      <span id="vm-status" style="color:#10b981;font-size:12.5px;font-weight:600">● Full 2D Lua VM + Bosses + Dialogue + BGM + Gamepad Ready</span>
+      <input type="file" id="proj-imp" accept=".hybproj,.json" style="display:none" onchange="importProjectFile(event)">
+      <button class="btn" onclick="document.getElementById('proj-imp').click()">📂 Import .hybproj</button>
+      <button class="btn" onclick="resetDefaultProjects()" title="Restore fresh starter templates">↺ Reset Templates</button>
+      <button class="btn green" onclick="downloadStudioApp()">⬇ Download index.html</button>
+      <button class="btn blue" onclick="openInstallHelp()">🖥 Install App</button>
+    </div>
+  </div>
+  <div class="hub-main">
+    <div class="hub-side">
+      <div class="hnav on">My Projects</div>
+      <div class="hnav" onclick="openNewProjModal('platformer')">+ Parkour Boss &amp; NPCs</div>
+      <div class="hnav" onclick="openNewProjModal('topdown')">+ Top-Down Action RPG</div>
+      <div class="hnav" onclick="openNewProjModal('blank')">+ Blank 2D Project</div>
+      <div style="margin-top:auto;padding:11px;background:#111622;border:1px solid #1e2636;border-radius:8px;font-size:11px;color:#94a3b8;line-height:1.5">
+        <strong style="color:#60a5fa">Ultimate Edition Suite</strong><br>
+        • Boss Fights + Phase AI &amp; NPC Dialogue<br>
+        • Bounce Pads, Crumble Bridges &amp; Water<br>
+        • Power-Up Buffs + Particle Emitters<br>
+        • 16-Step Chiptune BGM Sequencer<br>
+        • Gamepad Support + Sprite Sheet Slicer
+      </div>
+    </div>
+    <div class="hub-body">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <h2>Projects</h2>
+        <button class="btn blue" onclick="openNewProjModal('platformer')">+ New 2D Lua Project</button>
+      </div>
+      <div class="grid" id="pgrid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- INSTALL APP HELP MODAL -->
+<div class="modal" id="instmod">
+  <div class="npwin">
+    <div class="pxtop">
+      <strong style="color:#60a5fa">Install HybridEngine Studio as a Desktop App</strong>
+      <button class="btn red" onclick="document.getElementById('instmod').classList.remove('open')">✕</button>
+    </div>
+    <div class="npbody" style="font-size:13px;color:#cbd5e1;line-height:1.6">
+      <p><strong>Step 1:</strong> Click <strong>⬇ Download index.html</strong> to save <code>index.html</code> locally or host it on GitHub Pages.</p>
+      <p><strong>Step 2:</strong> Open it in Chrome/Edge, click the <strong>⋮ menu</strong> → <strong>Cast, save, and share</strong> → <strong>Create shortcut...</strong></p>
+      <p><strong>Step 3:</strong> Check <strong>"Open as window"</strong> and click <strong>Create</strong> to run HybridEngine Studio as a standalone desktop app.</p>
+      <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:6px">
+        <button class="btn green" onclick="downloadStudioApp()">⬇ Download index.html Now</button>
+        <button class="btn" onclick="document.getElementById('instmod').classList.remove('open')">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- NEW PROJECT CREATOR MODAL -->
+<div class="modal" id="npmod">
+  <div class="npwin">
+    <div class="pxtop">
+      <strong style="color:#60a5fa">Create New 2D Lua Project</strong>
+      <button class="btn red" onclick="closeNewProjModal()">✕</button>
+    </div>
+    <div class="npbody">
+      <div style="display:flex;flex-direction:column;gap:5px">
+        <label style="font-size:12px;color:#94a3b8;font-weight:600">Project Name</label>
+        <input type="text" id="np-name" placeholder="My 2D Parkour Adventure" style="width:100%;font-size:13px;padding:8px">
+      </div>
+      <div style="display:flex;flex-direction:column;gap:7px">
+        <label style="font-size:12px;color:#94a3b8;font-weight:600">Starting Template</label>
+        <div class="tpl-opt on" id="tpl-platformer" onclick="pickTpl('platformer')">
+          <strong style="font-size:13px">🏃 Parkour Adventure: Boss, NPCs, Bounce Pads &amp; Slopes</strong>
+          <span style="font-size:11.5px;color:#94a3b8">Features an interactive NPC guide (press E), Bounce Pad, Crumbling Bridge, Power-Up buff, Grapple Hook, and a multi-phase Arena Boss!</span>
+        </div>
+        <div class="tpl-opt" id="tpl-topdown" onclick="pickTpl('topdown')">
+          <strong style="font-size:13px">🧭 Top-Down Action RPG (Whisker Obstacle-Avoidance AI)</strong>
+          <span style="font-size:11.5px;color:#94a3b8">Enemies steer around pillars and walls with multi-ray feelers, Dash (Shift/Space), Sword Slash (F) &amp; Twin-Stick Blaster.</span>
+        </div>
+        <div class="tpl-opt" id="tpl-blank" onclick="pickTpl('blank')">
+          <strong style="font-size:13px">📄 Blank 2D Project</strong>
+          <span style="font-size:11.5px;color:#94a3b8">Clean starter floor &amp; hero ready for Tile Brush painting, Sprite Sheet slicing, BGM composing, and Lua scripts.</span>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:4px">
+        <button class="btn" onclick="closeNewProjModal()">Cancel</button>
+        <button class="btn green" onclick="confirmCreateProject()">Create &amp; Open Project →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 2. 2D GAME EDITOR -->
+<div id="ed">
+  <div class="top">
+    <div style="display:flex;align-items:center;gap:6px">
+      <button class="btn" onclick="toHub()">← Menu</button>
+      <strong>Hybrid<span style="color:#60a5fa">Engine</span></strong>
+      <span id="ed-proj-title" style="font-size:12px;color:#93c5fd;background:#131824;padding:4px 8px;border-radius:5px;border:1px solid #263044">Project</span>
+      <select id="scene-sel" onchange="switchScene(this.value)"></select>
+      <button class="btn" onclick="newScene()">+ Scene</button>
+    </div>
+    <div style="display:flex;gap:5px">
+      <button class="btn green" id="pbtn" onclick="togglePlay()">▶ Play</button>
+      <button class="btn" id="pausebtn" style="display:none" onclick="togglePause()">⏸ Pause (Esc)</button>
+      <button class="btn" id="brushbtn" onclick="toggleTileBrush()" title="Paint tiles directly on grid">🖌 Tile Brush</button>
+      <button class="btn" id="undobtn" onclick="undoScene()" title="Undo (Ctrl+Z)" disabled>↶</button>
+      <button class="btn" id="redobtn" onclick="redoScene()" title="Redo (Ctrl+Y)" disabled>↷</button>
+      <button class="btn on" id="sbtn" onclick="snap=!snap;this.textContent='⊞ Snap: '+(snap?'ON':'OFF');this.classList.toggle('on')">⊞ Snap: ON</button>
+      <button class="btn" onclick="duplicateSelected()" title="Ctrl+D">❐ Dup</button>
+      <button class="btn blue" onclick="openPx()">🎨 Pixel Art</button>
+    </div>
+    <div style="display:flex;gap:5px">
+      <button class="btn" id="mutebtn" onclick="toggleMute()">🔊</button>
+      <button class="btn" onclick="exportProjectFile()" title="Export editable .hybproj backup">📦 .hybproj</button>
+      <button class="btn" onclick="saveStorage();logOut('[App] Project & assets saved!')">💾 Save</button>
+      <button class="btn purple" onclick="exportStandaloneGame()">⚡ Export (.html)</button>
+    </div>
+  </div>
+
+  <div class="work">
+    <!-- Left: Hierarchy -->
+    <div class="left">
+      <div class="phead"><span>Scene Hierarchy</span><span id="node-count">0</span></div>
+      <div class="addg">
+        <button class="btn" onclick="addNode('Player')">+ Player</button>
+        <button class="btn" onclick="addNode('Enemy')">+ Parkour AI</button>
+        <button class="btn red" onclick="addNode('Boss')">+ Boss</button>
+        <button class="btn blue" onclick="addNode('NPC')">+ NPC</button>
+        <button class="btn" onclick="addNode('Platform')">+ Platform</button>
+        <button class="btn" onclick="addNode('OneWay')">+ 1-Way Ledge</button>
+        <button class="btn" onclick="addNode('BouncePad')">+ Bounce Pad</button>
+        <button class="btn" onclick="addNode('CrumblePlat')">+ Crumble Plat</button>
+        <button class="btn" onclick="addNode('WaterZone')">+ Water Zone</button>
+        <button class="btn" onclick="addNode('SlopeRight')">+ Slope ◢</button>
+        <button class="btn" onclick="addNode('SlopeLeft')">+ Slope ◣</button>
+        <button class="btn" onclick="addNode('GrappleAnchor')">+ Grapple Hook</button>
+        <button class="btn amber" onclick="addNode('PowerUp')">+ PowerUp</button>
+        <button class="btn" onclick="addNode('Wall')">+ Wall</button>
+        <button class="btn" onclick="addNode('Checkpoint')">+ Checkpoint</button>
+        <button class="btn" onclick="addNode('HealthPack')">+ Health Pack</button>
+        <button class="btn" onclick="addNode('Goal')">+ Goal Portal</button>
+        <button class="btn" onclick="addNode('Coin')">+ Coin</button>
+        <button class="btn" onclick="addNode('Spike')">+ Hazard</button>
+        <button class="btn" onclick="addNode('Text')">+ HUD Text</button>
+      </div>
+      <div id="tree" style="overflow-y:auto;flex:1"></div>
+    </div>
+
+    <!-- Center: Viewport + Bottom Drawer -->
+    <div class="mid">
+      <div class="vwrap" id="vwrap">
+        <canvas id="vp" tabindex="0"></canvas>
+        <div class="hud" id="hud">Press Play • E Talk/Grapple • Shift Dash • F Slash • Gamepad Supported • F3 Debug</div>
+        <div class="vtools">
+          <button class="btn" id="dbg-btn" onclick="debugSensors=!debugSensors;this.classList.toggle('on',debugSensors)" title="Toggle AI Raycasts, Live Lua Vars & Hitboxes (F3)">👁 Debug (F3)</button>
+          <button class="btn on" id="cam-follow-btn" onclick="camFollow=!camFollow;this.classList.toggle('on',camFollow)">🎥 Follow</button>
+          <button class="btn" onclick="changeZoom(-0.15)" title="Zoom Out">-</button>
+          <button class="btn" id="zoom-btn" onclick="resetCam()" title="Reset Camera & Zoom">100%</button>
+          <button class="btn" onclick="changeZoom(0.15)" title="Zoom In">+</button>
+        </div>
+
+        <!-- NPC Typewriter Dialogue Box -->
+        <div id="dialogue-ui" onclick="advanceDialogue()">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <strong id="dlg-speaker" style="color:#60a5fa;font-size:13px;letter-spacing:.5px">NPC</strong>
+            <span style="font-size:11px;color:#64748b">Press Space / E or Click to continue ▸</span>
+          </div>
+          <div id="dlg-text" style="font-size:14px;color:#f8fafc;line-height:1.5;min-height:22px"></div>
+        </div>
+
+        <!-- Title Screen Overlay -->
+        <div class="vp-overlay" id="title-ui">
+          <div class="ov-title" id="title-main" style="color:#60a5fa;text-shadow:0 4px 28px rgba(59,130,246,.5)">HYBRID ADVENTURE</div>
+          <div id="title-sub" style="font-size:15px;color:#cbd5e1">Press Start or Enter to Begin</div>
+          <button class="btn green" style="padding:12px 26px;font-size:15px;margin-top:6px" onclick="dismissTitleScreen()">▶ START GAME</button>
+        </div>
+
+        <!-- Game Over Overlay -->
+        <div class="vp-overlay" id="gameover-ui">
+          <div class="ov-title" style="color:#ef4444;text-shadow:0 4px 24px rgba(239,68,68,.5)">GAME OVER</div>
+          <div id="gameover-sub" style="font-size:15px;color:#cbd5e1">You were defeated!</div>
+          <div style="display:flex;gap:10px;margin-top:6px">
+            <button class="btn green" style="padding:10px 18px;font-size:14px" onclick="retryPlay()">↻ Retry (R)</button>
+            <button class="btn" style="padding:10px 16px;font-size:14px" onclick="togglePlay()">■ Back to Editor</button>
+          </div>
+        </div>
+
+        <!-- Pause Overlay -->
+        <div class="vp-overlay" id="pause-ui">
+          <div class="ov-title" style="color:#60a5fa">PAUSED</div>
+          <div style="font-size:13px;color:#94a3b8">Press Esc or Resume to continue</div>
+          <div style="display:flex;gap:10px;margin-top:6px">
+            <button class="btn green" style="padding:10px 18px;font-size:14px" onclick="togglePause()">▶ Resume (Esc)</button>
+            <button class="btn" style="padding:10px 16px;font-size:14px" onclick="toggleMute()" id="pause-mute-btn">🔊 Sound: ON</button>
+            <button class="btn" style="padding:10px 16px;font-size:14px" onclick="retryPlay()">↻ Restart</button>
+            <button class="btn red" style="padding:10px 16px;font-size:14px" onclick="togglePlay()">■ Editor</button>
+          </div>
+        </div>
+
+        <!-- Level Complete Overlay -->
+        <div class="vp-overlay" id="win-ui">
+          <div class="ov-title" style="color:#10b981;text-shadow:0 4px 24px rgba(16,185,129,.45)">LEVEL COMPLETE!</div>
+          <div id="win-sub" style="font-size:15px;color:#cbd5e1">Stage Cleared!</div>
+          <div style="display:flex;gap:10px;margin-top:6px">
+            <button class="btn green" style="padding:10px 18px;font-size:14px" onclick="advanceNextLevel()">Next Level →</button>
+            <button class="btn" style="padding:10px 16px;font-size:14px" onclick="retryPlay()">↻ Replay</button>
+            <button class="btn" style="padding:10px 16px;font-size:14px" onclick="togglePlay()">■ Editor</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="drawer">
+        <div class="dtabs">
+          <div class="dtab-list">
+            <div class="dtab on" onclick="setDTab('assets',this)">Sprites &amp; Tilesets</div>
+            <div class="dtab" onclick="setDTab('prefabs',this)">Prefabs</div>
+            <div class="dtab" onclick="setDTab('bgm',this)">BGM Music</div>
+            <div class="dtab" onclick="setDTab('sfx',this)">SFX Studio</div>
+            <div class="dtab" onclick="setDTab('world',this)">World &amp; Title</div>
+            <div class="dtab" onclick="setDTab('console',this)">Lua Console</div>
+          </div>
+          <div style="display:flex;gap:6px">
+            <input type="file" id="fimp" accept="image/*,.zip,application/zip" multiple="" style="display:none" onchange="impFile(event)">
+            <button class="btn" onclick="startImp('Sprite')">+ Sprite / ZIP</button>
+            <button class="btn" onclick="startImp('Tileset')">+ Tileset / ZIP</button>
+            <button class="btn blue" onclick="openPx()">+ Draw / Slice</button>
+          </div>
+        </div>
+        <div class="dbody" id="dbody"></div>
+      </div>
+    </div>
+
+    <!-- Right: Inspector -->
+    <div class="right">
+      <div class="phead" style="margin:-12px -12px 12px">Inspector</div>
+      <div id="insp"></div>
+    </div>
+  </div>
+</div>
+
+<!-- 3. PIXEL EDITOR, ANIMATOR & SPRITE SHEET SLICER MODAL -->
+<div class="modal" id="pxmod">
+  <div class="pxwin">
+    <div class="pxtop">
+      <div style="display:flex;gap:8px;align-items:center">
+        <strong style="color:#60a5fa">Pixel Animator &amp; Sprite Sheet Slicer</strong>
+        <select id="pxsz" onchange="initPx(Number(this.value))"><option value="16">16x16</option><option value="32">32x32</option></select>
+        <select id="pxcat"><option value="Sprite">Sprite</option><option value="Tileset">Tileset</option></select>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn green" onclick="savePx()">✓ Save to Assets</button>
+        <button class="btn red" onclick="closePx()">✕</button>
+      </div>
+    </div>
+    <div class="pxmid">
+      <div class="pxtools">
+        <button class="btn on" id="tp" onclick="setTool('pen')">✎ Pencil</button>
+        <button class="btn" id="te" onclick="setTool('erase')">⌫ Eraser</button>
+        <button class="btn" id="tf" onclick="setTool('fill')">🪣 Fill</button>
+        <button class="btn" onclick="frames[fcur]=blank(gsz);drawPx();drawStrip()">Clear Frame</button>
+        <input type="color" id="pxcol" value="#3b82f6" style="width:100%;height:28px;padding:0;border:none">
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:4px" id="pal"></div>
+        <div style="border-top:1px solid #1e2636;padding-top:7px;margin-top:2px;display:flex;flex-direction:column;gap:5px">
+          <span style="font-size:10px;font-weight:700;color:#60a5fa;text-transform:uppercase">Load / Slice Asset</span>
+          <select id="px-asset-sel" style="width:100%"></select>
+          <div style="display:flex;gap:4px">
+            <button class="btn blue" style="flex:1;justify-content:center" onclick="loadImportedIntoPx()">📥 Load</button>
+            <button class="btn red" title="Delete selected asset" onclick="deleteSelectedPxAsset()">🗑</button>
+          </div>
+          <div style="display:flex;gap:4px;align-items:center;font-size:10px;color:#94a3b8;margin-top:2px">
+            <span>Cols</span><input type="number" id="slice-cols" value="4" min="1" max="32" style="width:42px;padding:2px 4px">
+            <span>Rows</span><input type="number" id="slice-rows" value="1" min="1" max="16" style="width:42px;padding:2px 4px">
+            <button class="btn amber" style="padding:3px 6px;font-size:10px" onclick="sliceSelectedSheet()">✂ Slice</button>
+          </div>
+        </div>
+      </div>
+      <div class="pxarea"><canvas id="pxc" width="320" height="320"></canvas></div>
+      <div class="pxprev">
+        <span style="font-size:11px;color:#64748b;font-weight:700">ANIMATION PREVIEW</span>
+        <canvas id="animc" width="112" height="112"></canvas>
+        <div class="row"><span>FPS</span><input type="number" id="afps" value="6" min="1" max="24" style="width:60px"></div>
+        <div style="margin-top:auto">
+          <span style="font-size:11px;color:#94a3b8">Asset Name</span>
+          <input type="text" id="aname" value="HeroSprite" style="width:100%;margin-top:4px">
+        </div>
+      </div>
+    </div>
+    <div class="pxtime">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:11px;color:#64748b;font-weight:700">FRAMES</span>
+        <div style="display:flex;gap:6px">
+          <button class="btn" onclick="addF()">+ Frame</button>
+          <button class="btn" onclick="dupF()">⧉ Duplicate</button>
+          <button class="btn red" onclick="delF()">Delete</button>
+        </div>
+      </div>
+      <div class="fstrip" id="fstrip"></div>
+    </div>
+  </div>
+</div>
+
+<!-- 4. LUA SCRIPT EDITOR MODAL -->
+<div class="modal" id="scmod">
+  <div class="scwin">
+    <div class="pxtop">
+      <div style="display:flex;gap:8px;align-items:center">
+        <strong style="color:#60a5fa">Full Lua Script Editor</strong>
+        <span id="sc-target" style="font-size:12px;color:#94a3b8;background:#131824;padding:3px 8px;border-radius:4px">Object.lua</span>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn green" onclick="saveScript()">✓ Save &amp; Compile Lua</button>
+        <button class="btn red" onclick="closeScript()">✕</button>
+      </div>
+    </div>
+    <div class="scbody">
+      <div class="scside">
+        <span style="font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase">Lua Templates</span>
+        <button class="btn" onclick="snip('plat')">🏃 Parkour Hero (Buffs + NPCs)</button>
+        <button class="btn" onclick="snip('boss')">👹 Multi-Phase Arena Boss</button>
+        <button class="btn" onclick="snip('npc')">💬 Interactive NPC Dialogue</button>
+        <button class="btn" onclick="snip('chaser')">🤖 Autonomous Parkour AI</button>
+        <button class="btn" onclick="snip('topdown')">🧭 Top-Down Sword + Blaster</button>
+        <button class="btn" onclick="snip('moving_plat')">🛗 Moving Platform</button>
+        <span style="font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;margin-top:6px">Click to Insert API</span>
+        <button class="api-pill" onclick="insertLuaSnippet('engine.say(&quot;Guide&quot;, &quot;Watch your step!&quot;)\n')">engine.say(speaker, text)</button>
+        <button class="api-pill" onclick="insertLuaSnippet('engine.camera_zoom(1.25)\n')">engine.camera_zoom(z)</button>
+        <button class="api-pill" onclick="insertLuaSnippet('engine.grapple_nearest(obj, 310)\n')">engine.grapple_nearest(obj)</button>
+        <button class="api-pill" onclick="insertLuaSnippet('engine.damage_text(obj.x, obj.y, &quot;-20&quot;, &quot;#ef4444&quot;)\n')">engine.damage_text(x,y,txt)</button>
+        <button class="api-pill" onclick="insertLuaSnippet('engine.hitstop(0.04)\nengine.shake(6, 0.15)\n')">engine.hitstop + shake</button>
+        <button class="api-pill" onclick="insertLuaSnippet('engine.sfx(&quot;coin&quot;)\n')">engine.sfx("coin")</button>
+      </div>
+      <textarea id="sccode" spellcheck="false"></textarea>
+    </div>
+    <div class="scerr" id="scerr"></div>
+  </div>
+</div>
+
+<script>
+  /* ==================== APP DOWNLOADER & PROJECT ARCHIVES ==================== */
+  function openInstallHelp() { document.getElementById("instmod").classList.add("open"); }
+
+  function downloadStudioApp() {
+    if (typeof saveStorage === "function") saveStorage();
+    const docHtml = "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
+    const blob = new Blob([docHtml], { type: "text/html" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "index.html";
+    a.click();
+    if (typeof logOut === "function") logOut("[App] Downloaded standalone index.html!");
+  }
+
+  function exportProjectFile() {
+    saveStorage();
+    const p = projs.find(x => x.id === activeProjId);
+    if (!p) return;
+    const blob = new Blob([JSON.stringify(p, null, 2)], { type: "application/json" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `${p.name.replace(/[^a-z0-9_-]/gi, "_")}.hybproj`;
+    a.click();
+    logOut(`[Archive] Exported project archive "${p.name}.hybproj"`);
+  }
+
+  function importProjectFile(e) {
+    const f = e.target.files && e.target.files[0];
+    if (!f) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      try {
+        const parsed = JSON.parse(ev.target.result);
+        if (!parsed || !parsed.scenes) throw new Error("Invalid .hybproj structure");
+        parsed.id = Date.now();
+        parsed.name = parsed.name || f.name.replace(/\.[^.]+$/, "");
+        projs.unshift(parsed);
+        saveStorage();
+        drawHub();
+        openProjectById(parsed.id);
+        logOut(`[Archive] Imported project "${parsed.name}"`);
+      } catch (err) {
+        alert("Could not import project file: " + err.message);
+      }
+    };
+    reader.readAsText(f);
+    e.target.value = "";
+  }
+
+  /* ==================== FULL LUA VM BRIDGE & ENGINE STATE ==================== */
+  const hasRealLua = typeof window.fengari !== 'undefined';
+
+  function formatLuaErr(e) {
+    if (!e) return "Unknown Lua Error";
+    if (typeof e === "string") return e;
+    if (e.message) return e.message;
+    try { return String(e); } catch (_) { return "Lua Runtime Error"; }
+  }
+
+  let keys = {};
+  let gpState = { left: false, right: false, up: false, down: false, jump: false, dash: false, slash: false, grapple: false, shoot: false };
+  let mouse = { x: 0, y: 0, down: false, rightDown: false, clicked: false, rightClicked: false };
+  let nodes = [];
+  let destroyQueue = new Set();
+  let scenes = {};
+  let curScene = "Level1";
+  let currentDt = 0.016;
+  let particles = [];
+  let dashGhosts = [];
+  let floatingTexts = [];
+  let shakeTime = 0, shakeMag = 0;
+  let hitstopTimer = 0;
+  let fadeAlpha = 0, pendingScene = null;
+  let isGameOver = false;
+  let isPaused = false;
+  let isLevelWon = false;
+  let isTitleOpen = false;
+  let audioMuted = false;
+  let debugSensors = false;
+  let tileBrushMode = false;
+  let activeBrushAssetId = null;
+  let isPaintingTiles = false;
+  let prefabs = [];
+
+  /* Dialogue State */
+  let dialogueQueue = [];
+  let activeDialogue = null;
+  let dialogueCharIdx = 0;
+  let dialogueTimer = 0;
+
+  function queueDialogue(speaker, text) {
+    dialogueQueue.push({ speaker: String(speaker || "NPC"), text: String(text || "") });
+    if (!activeDialogue) advanceDialogue();
+  }
+
+  function advanceDialogue() {
+    if (activeDialogue && dialogueCharIdx < activeDialogue.text.length) {
+      dialogueCharIdx = activeDialogue.text.length;
+      document.getElementById("dlg-text").textContent = activeDialogue.text;
+      return;
+    }
+    if (dialogueQueue.length > 0) {
+      activeDialogue = dialogueQueue.shift();
+      dialogueCharIdx = 0;
+      dialogueTimer = 0;
+      document.getElementById("dlg-speaker").textContent = activeDialogue.speaker;
+      document.getElementById("dlg-text").textContent = "";
+      document.getElementById("dialogue-ui").classList.add("open");
+      playSfx("coin");
+    } else {
+      activeDialogue = null;
+      document.getElementById("dialogue-ui").classList.remove("open");
+    }
+  }
+
+  let worldCfg = {
+    gravity: 1150,
+    skyTop: "#090d16",
+    skyBot: "#111927",
+    showGrid: true,
+    useTitleScreen: false,
+    titleHeading: "HYBRID ADVENTURE",
+    titleSub: "Press Start or Enter to Begin",
+    p1Color: "#141d2e",
+    p1Speed: 0.22,
+    p1Style: "mountains",
+    p2Color: "#1c283e",
+    p2Speed: 0.48,
+    p2Style: "ruins"
+  };
+
+  let sfxPresets = {
+    jump: { freq: 520, endFreq: 760, dur: 0.11, type: "triangle" },
+    coin: { freq: 920, endFreq: 1320, dur: 0.12, type: "sine" },
+    laser: { freq: 840, endFreq: 240, dur: 0.09, type: "sawtooth" },
+    explosion: { freq: 180, endFreq: 45, dur: 0.28, type: "sawtooth" },
+    grapple: { freq: 620, endFreq: 980, dur: 0.1, type: "square" },
+    hit: { freq: 260, endFreq: 110, dur: 0.1, type: "square" },
+    bounce: { freq: 340, endFreq: 880, dur: 0.14, type: "sine" }
+  };
+
+  /* 16-Step Chiptune BGM Sequencer */
+  const BGM_NOTES = [0, 261.63, 293.66, 329.63, 392.00, 440.00, 523.25, 587.33, 659.25];
+  const BGM_LABELS = ["-", "C4", "D4", "E4", "G4", "A4", "C5", "D5", "E5"];
+  const BASS_NOTES = [0, 130.81, 146.83, 164.81, 196.00, 220.00];
+  const BASS_LABELS = ["-", "C3", "D3", "E3", "G3", "A3"];
+  let bgmCfg = {
+    enabled: true,
+    bpm: 128,
+    lead: [6, 0, 5, 0, 4, 0, 5, 6, 8, 0, 6, 0, 5, 4, 3, 0],
+    bass: [1, 0, 1, 0, 4, 0, 4, 0, 5, 0, 5, 0, 3, 0, 4, 0]
+  };
+  let bgmStep = 0, bgmAccum = 0, bgmPreviewing = false;
+
+  function stepBgm(dt) {
+    if ((!play && !bgmPreviewing) || !bgmCfg.enabled || audioMuted || isPaused || isGameOver) return;
+    const stepDur = 60 / Math.max(60, Math.min(240, bgmCfg.bpm || 128)) / 4;
+    bgmAccum += dt;
+    if (bgmAccum >= stepDur) {
+      bgmAccum -= stepDur;
+      const lIdx = bgmCfg.lead[bgmStep] || 0;
+      const bIdx = bgmCfg.bass[bgmStep] || 0;
+      if (lIdx > 0 && BGM_NOTES[lIdx]) playTone(BGM_NOTES[lIdx], stepDur * 0.85, "square", null, 0.032);
+      if (bIdx > 0 && BASS_NOTES[bIdx]) playTone(BASS_NOTES[bIdx], stepDur * 0.9, "triangle", null, 0.048);
+      bgmStep = (bgmStep + 1) % 16;
+      if (dTab === "bgm") {
+        document.querySelectorAll(".seq-step").forEach(el => {
+          el.classList.toggle("playhead", Number(el.dataset.step) === bgmStep);
+        });
+      }
+    }
+  }
+
+  /* Gamepad Polling */
+  function pollGamepads() {
+    if (!navigator.getGamepads) return;
+    const pads = navigator.getGamepads();
+    const gp = pads && (pads[0] || pads[1]);
+    if (!gp) {
+      gpState = { left: false, right: false, up: false, down: false, jump: false, dash: false, slash: false, grapple: false, shoot: false };
+      return;
+    }
+    const ax0 = gp.axes[0] || 0, ax1 = gp.axes[1] || 0;
+    const b = i => !!(gp.buttons[i] && gp.buttons[i].pressed);
+    gpState.left = ax0 < -0.35 || b(14);
+    gpState.right = ax0 > 0.35 || b(15);
+    gpState.up = ax1 < -0.35 || b(12);
+    gpState.down = ax1 > 0.35 || b(13);
+    gpState.jump = b(0);
+    gpState.dash = b(1);
+    gpState.slash = b(2);
+    gpState.grapple = b(3) || b(4);
+    gpState.shoot = b(5) || b(7);
+    if (isTitleOpen && (b(0) || b(9))) dismissTitleScreen();
+    if (activeDialogue && b(0)) advanceDialogue();
+  }
+
+  function isInputActive(k) {
+    const key = String(k).toLowerCase();
+    if (key === "mouse1" || key === "click") return !!mouse.down || gpState.shoot;
+    if (key === "mouse1_pressed") return !!mouse.clicked;
+    if (key === "mouse2" || key === "rightclick") return !!mouse.rightDown;
+    if (key === "mouse2_pressed") return !!mouse.rightClicked;
+    if ((key === "a" || key === "arrowleft") && gpState.left) return true;
+    if ((key === "d" || key === "arrowright") && gpState.right) return true;
+    if ((key === "w" || key === "arrowup") && gpState.up) return true;
+    if ((key === "s" || key === "arrowdown") && gpState.down) return true;
+    if (key === "space" && gpState.jump) return true;
+    if (key === "shift" && gpState.dash) return true;
+    if (key === "f" && gpState.slash) return true;
+    if (key === "e" && gpState.grapple) return true;
+    return !!keys[key];
+  }
+
+  function clearAllOverlays() {
+    isGameOver = false;
+    isPaused = false;
+    isLevelWon = false;
+    isTitleOpen = false;
+    hitstopTimer = 0;
+    activeDialogue = null;
+    dialogueQueue = [];
+    ["gameover-ui", "pause-ui", "win-ui", "title-ui", "dialogue-ui"].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.classList.remove("open");
+    });
+  }
+
+  function dismissTitleScreen() {
+    isTitleOpen = false;
+    const el = document.getElementById("title-ui");
+    if (el) el.classList.remove("open");
+    playSfx("coin");
+  }
+
+  function triggerGameOver(msg = "You were defeated!") {
+    if (isGameOver || isLevelWon) return;
+    isGameOver = true;
+    const sub = document.getElementById("gameover-sub");
+    if (sub) sub.textContent = msg;
+    const ui = document.getElementById("gameover-ui");
+    if (ui) ui.classList.add("open");
+    playSfx("explosion");
+  }
+
+  function triggerLevelComplete(msg = "Stage Cleared!") {
+    if (isLevelWon || isGameOver) return;
+    isLevelWon = true;
+    const sub = document.getElementById("win-sub");
+    if (sub) sub.textContent = msg;
+    const ui = document.getElementById("win-ui");
+    if (ui) ui.classList.add("open");
+    playSfx("coin");
+  }
+
+  function requestSceneTransition(targetScene) {
+    if (!scenes[targetScene]) return;
+    if (!play) { switchScene(targetScene); return; }
+    pendingScene = targetScene;
+    fadeAlpha = 0.02;
+  }
+
+  function advanceNextLevel() {
+    const keysList = Object.keys(scenes);
+    const idx = keysList.indexOf(curScene);
+    const nextScene = idx >= 0 && idx + 1 < keysList.length ? keysList[idx + 1] : keysList[0];
+    clearAllOverlays();
+    switchScene(nextScene);
+  }
+
+  function togglePause() {
+    if (!play || isGameOver || isLevelWon || isTitleOpen) return;
+    isPaused = !isPaused;
+    const ui = document.getElementById("pause-ui");
+    if (ui) ui.classList.toggle("open", isPaused);
+    const pb = document.getElementById("pausebtn");
+    if (pb) pb.classList.toggle("on", isPaused);
+  }
+
+  function toggleMute() {
+    audioMuted = !audioMuted;
+    const b1 = document.getElementById("mutebtn");
+    const b2 = document.getElementById("pause-mute-btn");
+    if (b1) b1.textContent = audioMuted ? "🔇" : "🔊";
+    if (b2) b2.textContent = audioMuted ? "🔇 Sound: OFF" : "🔊 Sound: ON";
+  }
+
+  function retryPlay() {
+    if (!play) return;
+    clearAllOverlays();
+    scenes = JSON.parse(JSON.stringify(savedScenes));
+    const p = projs.find(x => x.id === activeProjId);
+    if (p) p.scenes = scenes;
+    nodes = scenes[curScene];
+    bootLuaScripts();
+    resetCam();
+    drawTree();
+    drawInsp();
+  }
+
+  function queueDestroy(id) {
+    if (id !== undefined && id !== null) destroyQueue.add(id);
+  }
+
+  function flushDestroyQueue() {
+    if (destroyQueue.size > 0) {
+      scenes[curScene] = nodes = nodes.filter(n => !destroyQueue.has(n.id));
+      destroyQueue.clear();
+    }
+  }
+
+  function spawnParticles(x, y, color = "#fde047", count = 10) {
+    for (let i = 0; i < count; i++) {
+      const ang = Math.random() * Math.PI * 2;
+      const spd = 60 + Math.random() * 220;
+      particles.push({
+        x, y,
+        vx: Math.cos(ang) * spd,
+        vy: Math.sin(ang) * spd - 40,
+        size: 3 + Math.random() * 4,
+        color,
+        life: 0.25 + Math.random() * 0.25,
+        maxLife: 0.5
+      });
+    }
+  }
+
+  function spawnDamageText(x, y, text, color = "#fde047") {
+    floatingTexts.push({
+      x, y,
+      vy: -58,
+      text: String(text),
+      color,
+      life: 0.72,
+      maxLife: 0.72
+    });
+  }
+
+  function triggerShake(mag = 6, dur = 0.16) {
+    shakeMag = Math.max(shakeMag, mag);
+    shakeTime = Math.max(shakeTime, dur);
+  }
+
+  function triggerHitstop(dur = 0.04) {
+    hitstopTimer = Math.max(hitstopTimer, Math.min(0.15, dur));
+  }
+
+  function findLedgeAt(mx, my, pad = 36) {
+    return nodes.find(o =>
+      !destroyQueue.has(o.id) &&
+      o.solid &&
+      (o.tag === "Platform" || o.tag === "OneWay" || o.tag === "Wall") &&
+      mx >= o.x - pad && mx <= o.x + o.w + pad &&
+      my >= o.y - pad && my <= o.y + o.h + pad
+    ) || null;
+  }
+
+  /* ==================== GRAPPLE HOOK PHYSICS ==================== */
+  function grappleNearest(obj, maxRange = 290) {
+    if (!obj) return false;
+    const cx = obj.x + obj.w * 0.5;
+    const cy = obj.y + obj.h * 0.5;
+    let best = null, bestDist = maxRange;
+    nodes.forEach(o => {
+      if (!destroyQueue.has(o.id) && o.tag === "GrappleAnchor") {
+        const ax = o.x + o.w * 0.5;
+        const ay = o.y + o.h * 0.5;
+        const d = Math.hypot(ax - cx, ay - cy);
+        if (d < bestDist) { bestDist = d; best = o; }
+      }
+    });
+    if (!best) return false;
+    obj.grappleId = best.id;
+    obj.grappleLen = Math.max(48, Math.min(maxRange, bestDist * 0.92));
+    obj.hanging = false;
+    obj.grounded = false;
+    obj.grav = true;
+    spawnParticles(best.x + best.w * 0.5, best.y + best.h * 0.5, "#38bdf8", 12);
+    playSfx("grapple");
+    return true;
+  }
+
+  function releaseGrapple(obj) {
+    if (!obj || !obj.grappleId) return;
+    obj.grappleId = null;
+    obj.vy = Math.min(obj.vy || 0, -290);
+    obj.vx = (obj.vx || 0) * 1.15;
+    playSfx("jump");
+  }
+
+  /* ==================== AUTONOMOUS PARKOUR & SLOPE AI ENGINE ==================== */
+  function rayHitSolid(self, x1, y1, x2, y2) {
+    const steps = 8;
+    for (let i = 1; i <= steps; i++) {
+      const t = i / steps;
+      const px = x1 + (x2 - x1) * t;
+      const py = y1 + (y2 - y1) * t;
+      const hit = nodes.find(o =>
+        o.id !== self.id &&
+        !destroyQueue.has(o.id) &&
+        o.solid &&
+        o.tag !== "Player" &&
+        o.tag !== "Enemy" &&
+        o.tag !== "Boss" &&
+        o.tag !== "NPC" &&
+        o.tag !== "SlopeLeft" &&
+        o.tag !== "SlopeRight" &&
+        px >= o.x && px <= o.x + o.w &&
+        py >= o.y && py <= o.y + o.h
+      );
+      if (hit) return hit;
+    }
+    return null;
+  }
+
+  function hasGroundAhead(self, dir) {
+    const probeX = dir > 0 ? (self.x + self.w + 10) : (self.x - 10);
+    const probeY = self.y + self.h + 22;
+    return !!nodes.find(o =>
+      o.id !== self.id &&
+      !destroyQueue.has(o.id) &&
+      o.solid &&
+      probeX >= o.x && probeX <= o.x + o.w &&
+      probeY >= o.y - 24 && probeY <= o.y + o.h
+    );
+  }
+
+  function runAutonomousParkourAI(obj, target, speed = 135) {
+    if (!obj || !target) return;
+    obj.ai_hang_t = Math.max(0, (obj.ai_hang_t || 0) - currentDt);
+    obj.ai_jump_cd = Math.max(0, (obj.ai_jump_cd || 0) - currentDt);
+    obj.ai_hang_cd = Math.max(0, (obj.ai_hang_cd || 0) - currentDt);
+
+    const cx = obj.x + obj.w * 0.5;
+    const cy = obj.y + obj.h * 0.5;
+    const tx = target.x + target.w * 0.5;
+    const ty = target.y + target.h * 0.5;
+    const dx = tx - cx;
+    const dy = ty - cy;
+    const dist = Math.hypot(dx, dy);
+
+    if (obj.topDown) {
+      obj.grav = false;
+      obj.hanging = false;
+      if (dist < 16 || dist > 620) { obj.vx = 0; obj.vy = 0; return; }
+      const baseAng = Math.atan2(dy, dx);
+      const feelerDist = 46;
+      const candAngles = [0, 0.45, -0.45, 0.9, -0.9, 1.35, -1.35, 1.8, -1.8, Math.PI];
+      let chosenAng = baseAng;
+      for (const offset of candAngles) {
+        const a = baseAng + offset;
+        if (!rayHitSolid(obj, cx, cy, cx + Math.cos(a) * feelerDist, cy + Math.sin(a) * feelerDist)) {
+          chosenAng = a;
+          break;
+        }
+      }
+      obj.vx = Math.cos(chosenAng) * speed;
+      obj.vy = Math.sin(chosenAng) * speed;
+      obj.flipX = obj.vx < 0;
+      return;
+    }
+
+    if (obj.hanging) {
+      if (obj.ai_hang_t <= 0 || obj.grounded || (!obj.wallLeft && !obj.wallRight)) {
+        const wasGrounded = obj.grounded;
+        obj.hanging = false;
+        obj.grav = true;
+        obj.ai_hang_cd = 0.65;
+        if (!wasGrounded) {
+          obj.vy = -370;
+          obj.vx = (obj.flipX ? -1 : 1) * (speed * 1.15);
+          spawnParticles(cx, obj.y + obj.h, "#38bdf8", 7);
+        }
+      } else {
+        obj.grav = false;
+        obj.vx = 0;
+        obj.vy = 0;
+        return;
+      }
+    }
+
+    obj.grav = true;
+
+    if (!obj.grounded && obj.ai_hang_cd <= 0 && obj.vy > -120 && obj.vy < 260 && (obj.wallLeft || obj.wallRight)) {
+      const probeX = obj.wallRight ? (obj.x + obj.w + 6) : (obj.x - 6);
+      const ledge = findLedgeAt(probeX, obj.y + 6, 18);
+      if (ledge && Math.abs((obj.y + 4) - ledge.y) <= 20) {
+        obj.hanging = true;
+        obj.grav = false;
+        obj.vx = 0;
+        obj.vy = 0;
+        obj.y = ledge.y - 4;
+        obj.flipX = obj.wallLeft;
+        obj.ai_hang_t = 0.18;
+        spawnParticles(probeX, ledge.y, "#38bdf8", 7);
+        return;
+      }
+    }
+
+    if (dist > 820) { obj.vx = 0; return; }
+
+    const dir = dx >= 0 ? 1 : -1;
+    obj.flipX = dir < 0;
+
+    const lookDist = 42;
+    const frontX = dir > 0 ? (obj.x + obj.w) : obj.x;
+    const lowWall = rayHitSolid(obj, frontX, obj.y + obj.h - 10, frontX + dir * lookDist, obj.y + obj.h - 10);
+    const highWall = rayHitSolid(obj, frontX, obj.y - 26, frontX + dir * lookDist, obj.y - 26);
+    const groundOk = hasGroundAhead(obj, dir);
+
+    obj.vx = (Math.abs(dx) > 14 || !obj.grounded) ? (dir * speed) : 0;
+
+    if (obj.grounded && obj.ai_jump_cd <= 0) {
+      if (lowWall || obj.wallLeft || obj.wallRight) {
+        const obsTop = lowWall ? lowWall.y : (obj.y - 60);
+        const climbHeight = (obj.y + obj.h) - obsTop;
+        obj.vy = climbHeight > 95 ? -560 : (highWall ? -510 : -430);
+        obj.vx = dir * (speed * 1.15);
+        obj.grounded = false;
+        obj.ai_jump_cd = 0.45;
+        spawnParticles(cx, obj.y + obj.h, "#f87171", 6);
+        return;
+      }
+
+      if (!groundOk) {
+        const acrossPlatform = nodes.find(o =>
+          o.id !== obj.id && !destroyQueue.has(o.id) && o.solid &&
+          ((dir > 0 && o.x > obj.x + obj.w && o.x - (obj.x + obj.w) < 260) ||
+           (dir < 0 && o.x + o.w < obj.x && obj.x - (o.x + o.w) < 260)) &&
+          Math.abs(o.y - (obj.y + obj.h)) < 160
+        );
+
+        if (acrossPlatform || dy <= 24) {
+          const landX = acrossPlatform
+            ? (dir > 0 ? acrossPlatform.x + 14 : acrossPlatform.x + acrossPlatform.w - 14)
+            : (cx + dir * 130);
+          const landY = acrossPlatform ? (acrossPlatform.y - obj.h) : obj.y;
+          const gdx = landX - cx;
+          const gdy = landY - obj.y;
+          const flightT = Math.max(0.32, Math.min(0.65, Math.abs(gdx) / 340));
+          const g = worldCfg.gravity || 1150;
+          obj.vx = gdx / flightT;
+          obj.vy = Math.min(-340, (gdy - 0.5 * g * flightT * flightT) / flightT);
+          obj.grounded = false;
+          obj.ai_jump_cd = 0.55;
+          spawnParticles(cx, obj.y + obj.h, "#38bdf8", 7);
+          return;
+        }
+      }
+
+      if (dy < -55 && Math.abs(dx) < 170) {
+        obj.vy = -490;
+        obj.grounded = false;
+        obj.ai_jump_cd = 0.65;
+        spawnParticles(cx, obj.y + obj.h, "#f87171", 6);
+      }
+    }
+  }
+
+  /* ==================== FENGARI LUA VM REGISTRATION ==================== */
+  if (hasRealLua) {
+    const L = window.fengari.L;
+    const lua = window.fengari.lua;
+    const to_luastring = window.fengari.to_luastring;
+    const to_jsstring = window.fengari.to_jsstring;
+
+    function regFn(name, fn) {
+      lua.lua_pushcfunction(L, fn);
+      lua.lua_setglobal(L, to_luastring(name));
+    }
+
+    regFn("__hyb_dt", L => { lua.lua_pushnumber(L, currentDt); return 1; });
+    regFn("__hyb_key", L => {
+      lua.lua_pushboolean(L, isInputActive(to_jsstring(lua.lua_tostring(L, 1))));
+      return 1;
+    });
+    regFn("__hyb_mouse_x", L => { lua.lua_pushnumber(L, mouse.x); return 1; });
+    regFn("__hyb_mouse_y", L => { lua.lua_pushnumber(L, mouse.y); return 1; });
+    regFn("__hyb_print", L => { logOut(to_jsstring(lua.lua_tostring(L, 1))); return 0; });
+    regFn("__hyb_sound", L => { playTone(lua.lua_tonumber(L, 1) || 440, lua.lua_tonumber(L, 2) || 0.1); return 0; });
+    regFn("__hyb_sfx", L => { playSfx(to_jsstring(lua.lua_tostring(L, 1))); return 0; });
+    regFn("__hyb_say", L => {
+      queueDialogue(
+        lua.lua_isstring(L, 1) ? to_jsstring(lua.lua_tostring(L, 1)) : "NPC",
+        lua.lua_isstring(L, 2) ? to_jsstring(lua.lua_tostring(L, 2)) : ""
+      );
+      return 0;
+    });
+    regFn("__hyb_cam_zoom", L => {
+      cam.zoom = Math.max(0.4, Math.min(2.2, lua.lua_tonumber(L, 1) || 1));
+      return 0;
+    });
+    regFn("__hyb_particles", L => {
+      spawnParticles(
+        lua.lua_tonumber(L, 1) || 0,
+        lua.lua_tonumber(L, 2) || 0,
+        lua.lua_isstring(L, 3) ? to_jsstring(lua.lua_tostring(L, 3)) : "#fde047",
+        lua.lua_tonumber(L, 4) || 10
+      );
+      return 0;
+    });
+    regFn("__hyb_damage_text", L => {
+      spawnDamageText(
+        lua.lua_tonumber(L, 1) || 0,
+        lua.lua_tonumber(L, 2) || 0,
+        lua.lua_isstring(L, 3) ? to_jsstring(lua.lua_tostring(L, 3)) : "-10",
+        lua.lua_isstring(L, 4) ? to_jsstring(lua.lua_tostring(L, 4)) : "#fde047"
+      );
+      return 0;
+    });
+    regFn("__hyb_hitstop", L => { triggerHitstop(lua.lua_tonumber(L, 1) || 0.04); return 0; });
+    regFn("__hyb_shake", L => { triggerShake(lua.lua_tonumber(L, 1) || 6, lua.lua_tonumber(L, 2) || 0.16); return 0; });
+    regFn("__hyb_gameover", L => { triggerGameOver(lua.lua_isstring(L, 1) ? to_jsstring(lua.lua_tostring(L, 1)) : "You were defeated!"); return 0; });
+    regFn("__hyb_win", L => { triggerLevelComplete(lua.lua_isstring(L, 1) ? to_jsstring(lua.lua_tostring(L, 1)) : "Stage Cleared!"); return 0; });
+    regFn("__hyb_scene", L => { requestSceneTransition(to_jsstring(lua.lua_tostring(L, 1))); return 0; });
+    regFn("__hyb_ledge_at", L => {
+      const hit = findLedgeAt(lua.lua_tonumber(L, 1) || 0, lua.lua_tonumber(L, 2) || 0, lua.lua_tonumber(L, 3) || 36);
+      if (hit) lua.lua_pushnumber(L, hit.id); else lua.lua_pushnil(L);
+      return 1;
+    });
+    regFn("__hyb_grapple_nearest", L => {
+      const self = nodes.find(x => x.id === lua.lua_tonumber(L, 1));
+      lua.lua_pushboolean(L, grappleNearest(self, lua.lua_tonumber(L, 2) || 290));
+      return 1;
+    });
+    regFn("__hyb_release_grapple", L => {
+      const self = nodes.find(x => x.id === lua.lua_tonumber(L, 1));
+      releaseGrapple(self);
+      return 0;
+    });
+    regFn("__hyb_ai_move", L => {
+      const self = nodes.find(x => x.id === lua.lua_tonumber(L, 1) && !destroyQueue.has(x.id));
+      const target = nodes.find(x => x.id === lua.lua_tonumber(L, 2) && !destroyQueue.has(x.id));
+      if (self && target) runAutonomousParkourAI(self, target, lua.lua_tonumber(L, 3) || 135);
+      return 0;
+    });
+    regFn("__hyb_ray_wall", L => {
+      const self = nodes.find(x => x.id === lua.lua_tonumber(L, 1));
+      const dir = lua.lua_tonumber(L, 2) || 1;
+      const dist = lua.lua_tonumber(L, 3) || 40;
+      if (!self) { lua.lua_pushboolean(L, false); return 1; }
+      const fx = dir > 0 ? (self.x + self.w) : self.x;
+      lua.lua_pushboolean(L, !!rayHitSolid(self, fx, self.y + self.h * 0.5, fx + dir * dist, self.y + self.h * 0.5));
+      return 1;
+    });
+    regFn("__hyb_ground_ahead", L => {
+      const self = nodes.find(x => x.id === lua.lua_tonumber(L, 1));
+      lua.lua_pushboolean(L, self ? hasGroundAhead(self, lua.lua_tonumber(L, 2) || 1) : false);
+      return 1;
+    });
+    regFn("__hyb_get_prop", L => {
+      const n = nodes.find(x => x.id === lua.lua_tonumber(L, 1));
+      const prop = to_jsstring(lua.lua_tostring(L, 2));
+      if (!n || n[prop] === undefined || n[prop] === null) { lua.lua_pushnil(L); return 1; }
+      const v = n[prop];
+      if (typeof v === "number") lua.lua_pushnumber(L, v);
+      else if (typeof v === "boolean") lua.lua_pushboolean(L, v);
+      else lua.lua_pushstring(L, to_luastring(String(v)));
+      return 1;
+    });
+    regFn("__hyb_set_prop", L => {
+      const n = nodes.find(x => x.id === lua.lua_tonumber(L, 1));
+      const prop = to_jsstring(lua.lua_tostring(L, 2));
+      if (!n) return 0;
+      const t = lua.lua_type(L, 3);
+      if (t === lua.LUA_TNUMBER) n[prop] = lua.lua_tonumber(L, 3);
+      else if (t === lua.LUA_TBOOLEAN) n[prop] = lua.lua_toboolean(L, 3);
+      else if (t === lua.LUA_TSTRING) n[prop] = to_jsstring(lua.lua_tostring(L, 3));
+      return 0;
+    });
+    regFn("__hyb_find", L => {
+      const tag = to_jsstring(lua.lua_tostring(L, 1));
+      const hit = nodes.find(o => !destroyQueue.has(o.id) && (o.tag === tag || o.name === tag));
+      if (hit) lua.lua_pushnumber(L, hit.id); else lua.lua_pushnil(L);
+      return 1;
+    });
+    regFn("__hyb_collides", L => {
+      const a = nodes.find(x => x.id === lua.lua_tonumber(L, 1) && !destroyQueue.has(x.id));
+      const tag = lua.lua_isstring(L, 2) ? to_jsstring(lua.lua_tostring(L, 2)) : null;
+      if (!a) { lua.lua_pushnil(L); return 1; }
+      const hit = nodes.find(o => o.id !== a.id && !destroyQueue.has(o.id) && (!tag || o.tag === tag || o.name === tag) &&
+        a.x < o.x + o.w && a.x + a.w > o.x && a.y < o.y + o.h && a.y + a.h > o.y);
+      if (hit) lua.lua_pushnumber(L, hit.id); else lua.lua_pushnil(L);
+      return 1;
+    });
+    regFn("__hyb_destroy", L => { const id = lua.lua_tonumber(L, 1); if (id) queueDestroy(id); return 0; });
+    regFn("__hyb_spawn", L => {
+      const tag = to_jsstring(lua.lua_tostring(L, 1));
+      const obj = {
+        id: Date.now() + Math.random(), name: tag, tag,
+        x: lua.lua_tonumber(L, 2) || 0, y: lua.lua_tonumber(L, 3) || 0,
+        w: lua.lua_tonumber(L, 4) || 12, h: lua.lua_tonumber(L, 5) || 12,
+        color: lua.lua_isstring(L, 6) ? to_jsstring(lua.lua_tostring(L, 6)) : "#f59e0b",
+        aid: null, grav: false, solid: false, flipX: false,
+        vx: lua.lua_tonumber(L, 7) || 0, vy: lua.lua_tonumber(L, 8) || 0,
+        grounded: false, wallLeft: false, wallRight: false, hanging: false, dashing: false,
+        text: "", script: "", life: lua.lua_tonumber(L, 9) || 0
+      };
+      nodes.push(obj);
+      lua.lua_pushnumber(L, obj.id);
+      return 1;
+    });
+  }
+
+  function createLuaRunner(luaSrc, nodeName, nodeId = 1) {
+    if (hasRealLua) {
+      const envId = 'env_' + Math.random().toString(36).slice(2, 10);
+      const safeName = nodeName.replace(/"/g, '\\"');
+      window.hyb_pending_src = luaSrc;
+
+      const setupLua = `
+        local synced = {
+          x=true, y=true, w=true, h=true,
+          vx=true, vy=true,
+          hp=true, maxHp=true, invuln=true,
+          grounded=true, wallLeft=true, wallRight=true, hanging=true, dashing=true, onSlope=true, inWater=true, grappleId=true,
+          buffType=true, buffTimer=true,
+          color=true, tag=true, name=true, text=true,
+          grav=true, solid=true, life=true, flipX=true, topDown=true
+        }
+
+        local function wrap_id(id)
+          if id == nil then return nil end
+          local store = { _id = id }
+          return setmetatable(store, {
+            __index = function(t, k)
+              if synced[k] then return __hyb_get_prop(id, k) end
+              return rawget(t, k)
+            end,
+            __newindex = function(t, k, v)
+              if synced[k] then __hyb_set_prop(id, k, v) else rawset(t, k, v) end
+            end
+          })
+        end
+
+        _G["${envId}"] = setmetatable({
+          _self = wrap_id(${Number(nodeId)}),
+          print = function(...)
+            local args = {...}
+            local parts = {}
+            for i = 1, select("#", ...) do parts[i] = tostring(args[i]) end
+            __hyb_print(table.concat(parts, "\\t"))
+          end,
+          input = {
+            is_down = function(k) return __hyb_key(tostring(k)) end,
+            mouse_x = function() return __hyb_mouse_x() end,
+            mouse_y = function() return __hyb_mouse_y() end
+          },
+          engine = {
+            find = function(tag) return wrap_id(__hyb_find(tostring(tag))) end,
+            ledge_at = function(x, y, pad) return wrap_id(__hyb_ledge_at(x or 0, y or 0, pad or 36)) end,
+            grapple_nearest = function(o, rng)
+              local oid = (type(o) == "table" and o._id) or o
+              return __hyb_grapple_nearest(oid, rng or 290)
+            end,
+            release_grapple = function(o)
+              local oid = (type(o) == "table" and o._id) or o
+              __hyb_release_grapple(oid)
+            end,
+            ai_move = function(o, target, spd)
+              local oid = (type(o) == "table" and o._id) or o
+              local tid = (type(target) == "table" and target._id) or target
+              __hyb_ai_move(oid, tid, spd or 135)
+            end,
+            ray_wall = function(o, dir, dist)
+              local oid = (type(o) == "table" and o._id) or o
+              return __hyb_ray_wall(oid, dir or 1, dist or 40)
+            end,
+            ground_ahead = function(o, dir)
+              local oid = (type(o) == "table" and o._id) or o
+              return __hyb_ground_ahead(oid, dir or 1)
+            end,
+            collides = function(o, tag)
+              local oid = (type(o) == "table" and o._id) or o
+              return wrap_id(__hyb_collides(oid, tag))
+            end,
+            destroy = function(o)
+              local oid = (type(o) == "table" and o._id) or o
+              __hyb_destroy(oid)
+            end,
+            spawn = function(tag, x, y, w, h, color, vx, vy, life)
+              return wrap_id(__hyb_spawn(tag, x, y, w or 12, h or 12, color or "#f59e0b", vx or 0, vy or 0, life or 0))
+            end,
+            say = function(speaker, text) __hyb_say(tostring(speaker or "NPC"), tostring(text or "")) end,
+            camera_zoom = function(z) __hyb_cam_zoom(z or 1) end,
+            sound = function(f, d) __hyb_sound(f or 440, d or 0.1) end,
+            sfx = function(name) __hyb_sfx(tostring(name)) end,
+            particles = function(x, y, col, n) __hyb_particles(x or 0, y or 0, col or "#fde047", n or 10) end,
+            damage_text = function(x, y, txt, col) __hyb_damage_text(x or 0, y or 0, txt or "-10", col or "#fde047") end,
+            hitstop = function(dur) __hyb_hitstop(dur or 0.04) end,
+            shake = function(mag, dur) __hyb_shake(mag or 6, dur or 0.16) end,
+            game_over = function(msg) __hyb_gameover(msg or "You were defeated!") end,
+            level_complete = function(msg) __hyb_win(msg or "Stage Cleared!") end,
+            load_scene = function(name) __hyb_scene(tostring(name)) end
+          }
+        }, { __index = _G })
+
+        local chunk, err = load(js.global.hyb_pending_src, "${safeName}.lua", "t", _G["${envId}"])
+        if not chunk then js.global.hyb_last_err = tostring(err); return false end
+        local ok, runErr = pcall(chunk)
+        if not ok then js.global.hyb_last_err = tostring(runErr); return false end
+        js.global.hyb_last_err = nil
+        return true
+      `;
+
+      window.hyb_last_err = null;
+      const compiledOk = window.fengari.load(setupLua)();
+      if (!compiledOk || window.hyb_last_err) throw new Error(window.hyb_last_err || "Syntax error in Lua script");
+
+      const startFn = window.fengari.load(`
+        local env = _G["${envId}"]
+        return function()
+          if env and type(env.on_start) == "function" then
+            local ok, err = pcall(env.on_start, env._self)
+            if not ok then error(tostring(err), 0) end
+          end
+        end
+      `)();
+
+      const updateFn = window.fengari.load(`
+        local env = _G["${envId}"]
+        return function()
+          if env and type(env.on_update) == "function" then
+            local ok, err = pcall(env.on_update, env._self, __hyb_dt())
+            if not ok then error(tostring(err), 0) end
+          end
+        end
+      `)();
+
+      return { on_start: () => startFn(), on_update: (n, dt) => { currentDt = dt; updateFn(); } };
+    }
+
+    let lines = luaSrc.split('\n').map(line => {
+      let out = '', inStr = false, q = '';
+      for (let i = 0; i < line.length; i++) {
+        const ch = line[i];
+        if (!inStr && (ch === '"' || ch === "'")) { inStr = true; q = ch; out += ch; }
+        else if (inStr && ch === q && line[i - 1] !== '\\') { inStr = false; out += ch; }
+        else if (!inStr && ch === '-' && line[i + 1] === '-') { break; }
+        else { out += ch; }
+      }
+      return out;
+    });
+    let code = lines.join('\n')
+      .replace(/\blocal\s+function\s+([a-zA-Z0-9_]+)\s*\(([^)]*)\)/g, 'function $1($2) {')
+      .replace(/\bfunction\s+([a-zA-Z0-9_]+)\s*\(([^)]*)\)/g, 'function $1($2) {')
+      .replace(/\blocal\s+/g, 'let ')
+      .replace(/\belseif\b([\s\S]+?)\bthen\b/g, '} else if ($1) {')
+      .replace(/\belse\b/g, '} else {')
+      .replace(/\bif\b([\s\S]+?)\bthen\b/g, 'if ($1) {')
+      .replace(/\bwhile\b([\s\S]+?)\bdo\b/g, 'while ($1) {')
+      .replace(/\bfor\s+([a-zA-Z0-9_]+)\s*=\s*([^,]+),\s*([^,]+)\s*do\b/g, 'for (let $1 = $2; $1 <= $3; $1++) {')
+      .replace(/\bend\b/g, '}')
+      .replace(/~=/g, '!==').replace(/\band\b/g, '&&').replace(/\bor\b/g, '||')
+      .replace(/\bnot\b/g, '!').replace(/\bnil\b/g, 'null').replace(/\.\./g, '+');
+
+    const luaMath = Object.create(Math);
+    luaMath.atan = (y, x) => x !== undefined ? Math.atan2(y, x) : Math.atan(y);
+    const luaString = {
+      format: (fmt, ...args) => { let i = 0; return String(fmt).replace(/%[sdif]/g, () => args[i++] ?? ""); }
+    };
+    const tostring = v => String(v);
+    const fn = new Function('obj', 'dt', 'input', 'engine', 'math', 'string', 'tostring', 'print', `
+      ${code}
+      return { on_start: typeof on_start === 'function' ? on_start : null, on_update: typeof on_update === 'function' ? on_update : null };
+    `);
+    return fn(null, 0.016, luaInputAPI, luaEngineAPI, luaMath, luaString, tostring, logOut);
+  }
+
+  /* ==================== WEB AUDIO RETRO SFX & BGM ENGINE ==================== */
+  let audioCtx = null;
+  function playTone(freq = 440, dur = 0.12, type = 'triangle', endFreq = null, vol = 0.085) {
+    if (audioMuted) return;
+    try {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+      if (endFreq && endFreq > 0) {
+        osc.frequency.exponentialRampToValueAtTime(endFreq, audioCtx.currentTime + dur);
+      }
+      gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+      osc.connect(gain); gain.connect(audioCtx.destination);
+      osc.start(); osc.stop(audioCtx.currentTime + dur);
+    } catch (e) {}
+  }
+
+  function playSfx(name) {
+    const p = sfxPresets[name];
+    if (p) playTone(p.freq, p.dur, p.type, p.endFreq, 0.085);
+    else playTone(520, 0.1, "triangle", null, 0.085);
+  }
+
+  /* ==================== ULTIMATE LUA GAMEPLAY SCRIPTS ==================== */
+  const defaultPlayerLua = `-- Parkour Hero: Grapple, Water Swim, Power-Up Buffs, Ledge Arc, Shift Dash & Hitstop Melee
+function on_start(obj)
+  obj.grav = true
+  obj.speed = 260
+  obj.jump = -490
+  obj.hp = 100
+  obj.maxHp = 100
+  obj.score = 0
+  obj.spawn_x = obj.x
+  obj.spawn_y = obj.y
+  obj.has_checkpoint = false
+  obj.coyote = 0
+  obj.jumps_left = 2
+  obj.jump_held = false
+  obj.hanging = false
+  obj.hang_cd = 0
+  obj.wall_lock = 0
+  obj.dash_timer = 0
+  obj.dash_cd = 0
+  obj.dashing = false
+  obj.fire_cd = 0
+  obj.slash_cd = 0
+  obj.invuln = 0
+  obj.buffType = ""
+  obj.buffTimer = 0
+end
+
+function on_update(obj, dt)
+  local hud = engine.find("HUD")
+  if hud ~= nil then
+    if obj.grappleId ~= nil then
+      hud.text = "SWINGING! Press Space to Launch • E/R-Click Release"
+    elseif obj.hanging then
+      hud.text = "HANGING! Click Ledge to Leap • Space Climb • S Drop"
+    else
+      local buffStr = obj.buffTimer > 0 and string.format(" | BUFF: %s (%.1fs)", obj.buffType, obj.buffTimer) or ""
+      hud.text = string.format("Score: %d | E Grapple/Talk | Shift Dash | F Slash%s", obj.score, buffStr)
+    end
+  end
+
+  if obj.buffTimer > 0 then
+    obj.buffTimer = obj.buffTimer - dt
+    if obj.buffTimer <= 0 then
+      obj.buffType = ""
+      obj.buffTimer = 0
+    end
+  end
+
+  local moveSpd = (obj.buffType == "SPEED" and obj.buffTimer > 0) and 380 or obj.speed
+  local maxJumps = (obj.buffType == "TRIPLE_JUMP" and obj.buffTimer > 0) and 3 or 2
+  local fireRate = (obj.buffType == "RAPID_FIRE" and obj.buffTimer > 0) and 0.08 or 0.2
+
+  if obj.hp <= 0 or obj.y > 920 then
+    engine.release_grapple(obj)
+    if obj.has_checkpoint then
+      obj.has_checkpoint = false
+      obj.hp = obj.maxHp
+      obj.x = obj.spawn_x
+      obj.y = obj.spawn_y
+      obj.vx = 0
+      obj.vy = 0
+      obj.hanging = false
+      obj.invuln = 1.2
+      engine.particles(obj.x + obj.w * 0.5, obj.y + obj.h * 0.5, "#10b981", 22)
+      engine.damage_text(obj.x, obj.y - 14, "RESPAWN!", "#10b981")
+      engine.sfx("coin")
+      return
+    else
+      engine.particles(obj.x + obj.w * 0.5, obj.y + obj.h * 0.5, "#ef4444", 24)
+      engine.game_over("Final Score: " .. tostring(obj.score))
+      return
+    end
+  end
+
+  obj.hang_cd = math.max(0, obj.hang_cd - dt)
+  obj.wall_lock = math.max(0, obj.wall_lock - dt)
+  obj.dash_cd = math.max(0, obj.dash_cd - dt)
+  obj.fire_cd = math.max(0, obj.fire_cd - dt)
+  obj.slash_cd = math.max(0, obj.slash_cd - dt)
+  obj.invuln = math.max(0, obj.invuln - dt)
+
+  local jump_key = input.is_down("w") or input.is_down("space") or input.is_down("arrowup")
+  local jump_pressed = jump_key and not obj.jump_held
+  obj.jump_held = jump_key
+
+  -- Grapple Hook Toggle (E or Right-Click when not talking to NPC)
+  if (input.is_down("e") or input.is_down("mouse2_pressed")) and engine.collides(obj, "NPC") == nil then
+    if obj.grappleId == nil then
+      engine.grapple_nearest(obj, 310)
+    end
+  end
+
+  if obj.grappleId ~= nil then
+    if input.is_down("a") or input.is_down("arrowleft") then
+      obj.vx = obj.vx - 460 * dt
+      obj.flipX = true
+    elseif input.is_down("d") or input.is_down("arrowright") then
+      obj.vx = obj.vx + 460 * dt
+      obj.flipX = false
+    end
+    if jump_pressed or input.is_down("s") then
+      engine.release_grapple(obj)
+      obj.jumps_left = 1
+    end
+    return
+  end
+
+  local pup = engine.collides(obj, "PowerUp")
+  if pup ~= nil then
+    local bname = pup.text ~= "" and pup.text or "SPEED"
+    obj.buffType = bname
+    obj.buffTimer = 8.0
+    engine.particles(pup.x + pup.w * 0.5, pup.y + pup.h * 0.5, "#f59e0b", 18)
+    engine.damage_text(obj.x, obj.y - 16, bname .. "!", "#f59e0b")
+    engine.destroy(pup)
+    engine.sfx("coin")
+  end
+
+  local cp = engine.collides(obj, "Checkpoint")
+  if cp ~= nil and cp.color ~= "#10b981" then
+    cp.color = "#10b981"
+    obj.spawn_x = cp.x
+    obj.spawn_y = cp.y - 4
+    obj.has_checkpoint = true
+    engine.particles(cp.x + cp.w * 0.5, cp.y + cp.h * 0.5, "#10b981", 18)
+    engine.damage_text(cp.x, cp.y - 12, "CHECKPOINT", "#10b981")
+    engine.sfx("coin")
+  end
+
+  local hp_pack = engine.collides(obj, "HealthPack")
+  if hp_pack ~= nil and obj.hp < obj.maxHp then
+    obj.hp = math.min(obj.maxHp, obj.hp + 35)
+    engine.particles(hp_pack.x + hp_pack.w * 0.5, hp_pack.y + hp_pack.h * 0.5, "#10b981", 14)
+    engine.damage_text(obj.x, obj.y - 14, "+35 HP", "#10b981")
+    engine.destroy(hp_pack)
+    engine.sfx("coin")
+  end
+
+  local goal = engine.collides(obj, "Goal")
+  if goal ~= nil then
+    engine.particles(goal.x + goal.w * 0.5, goal.y + goal.h * 0.5, "#a855f7", 26)
+    engine.level_complete("Final Score: " .. tostring(obj.score))
+    return
+  end
+
+  if obj.hanging then
+    if not obj.wallLeft and not obj.wallRight then
+      obj.hanging = false
+      obj.grav = true
+      obj.color = "#3b82f6"
+      return
+    end
+    obj.grav = false
+    obj.vx = 0
+    obj.vy = 0
+    obj.jumps_left = maxJumps
+    obj.color = "#38bdf8"
+
+    if input.is_down("mouse1_pressed") then
+      local mx = input.mouse_x()
+      local my = input.mouse_y()
+      local target_ledge = engine.ledge_at(mx, my, 48)
+      local tx, ty = mx, my
+      if target_ledge ~= nil then
+        tx = ((target_ledge.x + target_ledge.w * 0.5) < obj.x) and (target_ledge.x + target_ledge.w - 8) or (target_ledge.x + 8)
+        ty = target_ledge.y - obj.h * 0.4
+      end
+      local dx = tx - (obj.x + obj.w * 0.5)
+      local dy = ty - (obj.y + obj.h * 0.5)
+      local dist = math.max(40, math.sqrt(dx * dx + dy * dy))
+      local flight_t = math.max(0.28, math.min(0.68, dist / 540))
+      local g = 1150
+
+      obj.hanging = false
+      obj.grav = true
+      obj.hang_cd = 0.22
+      obj.wall_lock = flight_t * 0.85
+      obj.vx = dx / flight_t
+      obj.vy = (dy - 0.5 * g * flight_t * flight_t) / flight_t
+      obj.flipX = obj.vx < 0
+      obj.color = "#3b82f6"
+      engine.particles(obj.x + obj.w * 0.5, obj.y + obj.h * 0.5, "#38bdf8", 14)
+      engine.shake(4, 0.1)
+      engine.sfx("jump")
+      return
+    end
+
+    if jump_pressed then
+      obj.hanging = false
+      obj.grav = true
+      obj.hang_cd = 0.28
+      obj.vy = -410
+      obj.vx = obj.flipX and -160 or 160
+      obj.color = "#3b82f6"
+      engine.sfx("jump")
+      return
+    end
+
+    if input.is_down("s") or input.is_down("arrowdown") then
+      obj.hanging = false
+      obj.grav = true
+      obj.hang_cd = 0.3
+      obj.vy = 90
+      obj.color = "#3b82f6"
+    end
+    return
+  end
+
+  if input.is_down("shift") and obj.dash_cd <= 0 and obj.dash_timer <= 0 then
+    obj.dash_timer = 0.15
+    obj.dash_cd = 0.85
+    obj.dashing = true
+    obj.invuln = 0.22
+    local ddir = obj.flipX and -1 or 1
+    obj.vx = ddir * 660
+    obj.vy = 0
+    engine.particles(obj.x + obj.w * 0.5, obj.y + obj.h * 0.5, "#38bdf8", 10)
+    engine.sfx("grapple")
+  end
+
+  if obj.dash_timer > 0 then
+    obj.dash_timer = obj.dash_timer - dt
+    obj.grav = false
+    obj.vy = 0
+    obj.color = "#38bdf8"
+    if obj.dash_timer <= 0 then
+      obj.dashing = false
+      obj.grav = true
+      obj.color = "#3b82f6"
+    end
+    return
+  end
+
+  obj.dashing = false
+  obj.grav = true
+  obj.color = "#3b82f6"
+
+  if obj.grounded or obj.inWater then
+    obj.coyote = 0.12
+    obj.jumps_left = maxJumps
+  else
+    obj.coyote = math.max(0, obj.coyote - dt)
+  end
+
+  if obj.wall_lock <= 0 then
+    if input.is_down("a") or input.is_down("arrowleft") then
+      obj.vx = -moveSpd
+      obj.flipX = true
+    elseif input.is_down("d") or input.is_down("arrowright") then
+      obj.vx = moveSpd
+      obj.flipX = false
+    else
+      obj.vx = obj.vx * 0.78
+      if math.abs(obj.vx) < 8 then obj.vx = 0 end
+    end
+  end
+
+  if not obj.grounded and not obj.inWater and obj.hang_cd <= 0 and obj.vy > -180 and (obj.wallLeft or obj.wallRight) then
+    local probe_x = obj.wallRight and (obj.x + obj.w + 6) or (obj.x - 6)
+    local ledge = engine.ledge_at(probe_x, obj.y + 8, 18)
+    if ledge ~= nil and math.abs((obj.y + 4) - ledge.y) <= 22 then
+      obj.hanging = true
+      obj.grav = false
+      obj.vx = 0
+      obj.vy = 0
+      obj.y = ledge.y - 4
+      obj.flipX = obj.wallLeft
+      engine.particles(probe_x, ledge.y, "#38bdf8", 8)
+      return
+    end
+  end
+
+  if not obj.grounded and (obj.wallLeft or obj.wallRight) and obj.vy > 130 then
+    obj.vy = 130
+  end
+
+  if jump_pressed then
+    if obj.inWater then
+      obj.vy = -270
+      engine.particles(obj.x + obj.w * 0.5, obj.y + obj.h, "#38bdf8", 5)
+      engine.sfx("jump")
+    elseif not obj.grounded and (obj.wallLeft or obj.wallRight) then
+      local kick_dir = obj.wallLeft and 1 or -1
+      obj.vx = kick_dir * 330
+      obj.vy = obj.jump * 0.94
+      obj.flipX = kick_dir < 0
+      obj.wall_lock = 0.18
+      engine.particles(obj.x + obj.w * 0.5, obj.y + obj.h * 0.5, "#38bdf8", 10)
+      engine.sfx("jump")
+    elseif obj.coyote > 0 or obj.jumps_left > 0 then
+      obj.vy = obj.jump
+      obj.grounded = false
+      obj.coyote = 0
+      obj.jumps_left = obj.jumps_left - 1
+      engine.particles(obj.x + obj.w * 0.5, obj.y + obj.h, "#93c5fd", 7)
+      engine.sfx("jump")
+    end
+  end
+
+  if input.is_down("f") and obj.slash_cd <= 0 then
+    obj.slash_cd = 0.34
+    local sx = obj.flipX and (obj.x - 36) or (obj.x + obj.w)
+    engine.spawn("Slash", sx, obj.y + 2, 36, obj.h - 4, "#38bdf8", obj.vx, 0, 0.12)
+    engine.particles(sx + 18, obj.y + obj.h * 0.5, "#38bdf8", 8)
+    engine.sfx("laser")
+  end
+
+  if input.is_down("mouse1_pressed") and obj.fire_cd <= 0 then
+    obj.fire_cd = fireRate
+    local cx = obj.x + obj.w * 0.5
+    local cy = obj.y + obj.h * 0.5
+    local ang = math.atan(input.mouse_y() - cy, input.mouse_x() - cx)
+    local bspd = 540
+    engine.spawn("Bullet", cx - 6, cy - 6, 12, 12, "#fde047", math.cos(ang) * bspd, math.sin(ang) * bspd, 1.4)
+    engine.sfx("laser")
+  end
+
+  local coin = engine.collides(obj, "Coin")
+  if coin ~= nil then
+    engine.particles(coin.x + coin.w * 0.5, coin.y + coin.h * 0.5, "#f59e0b", 12)
+    engine.damage_text(coin.x, coin.y - 8, "+25", "#fde047")
+    engine.destroy(coin)
+    obj.score = obj.score + 25
+    engine.sfx("coin")
+  end
+
+  local enemy = engine.collides(obj, "Enemy")
+  if enemy ~= nil then
+    if obj.vy > 0 and (obj.y + obj.h) <= (enemy.y + enemy.h * 0.72) then
+      obj.y = enemy.y - obj.h - 2
+      obj.vy = obj.jump * 0.85
+      obj.invuln = 0.25
+      engine.hitstop(0.045)
+      engine.damage_text(enemy.x, enemy.y - 12, "STOMP!", "#38bdf8")
+      engine.particles(enemy.x + enemy.w * 0.5, enemy.y + enemy.h * 0.5, "#ef4444", 16)
+      engine.shake(6, 0.14)
+      engine.spawn("Coin", enemy.x + 8, enemy.y + 4, 20, 20, "#f59e0b", 0, 0, 0)
+      engine.destroy(enemy)
+      obj.score = obj.score + 50
+      engine.sfx("explosion")
+    elseif obj.invuln <= 0 then
+      obj.hp = math.max(0, obj.hp - 20)
+      obj.invuln = 0.85
+      obj.vy = -260
+      obj.vx = (obj.x < enemy.x) and -220 or 220
+      obj.wall_lock = 0.18
+      engine.hitstop(0.04)
+      engine.damage_text(obj.x, obj.y - 12, "-20", "#ef4444")
+      engine.shake(8, 0.2)
+      engine.sfx("hit")
+    end
+  end
+
+  local boss = engine.collides(obj, "Boss")
+  if boss ~= nil and obj.invuln <= 0 then
+    obj.hp = math.max(0, obj.hp - 25)
+    obj.invuln = 0.9
+    obj.vy = -300
+    obj.vx = (obj.x < boss.x) and -280 or 280
+    obj.wall_lock = 0.2
+    engine.hitstop(0.05)
+    engine.damage_text(obj.x, obj.y - 14, "-25 BOSS!", "#ef4444")
+    engine.shake(10, 0.24)
+    engine.sfx("hit")
+  end
+
+  local ebolt = engine.collides(obj, "EnemyBullet")
+  if ebolt ~= nil then
+    engine.particles(ebolt.x, ebolt.y, "#f43f5e", 10)
+    engine.destroy(ebolt)
+    if obj.invuln <= 0 then
+      obj.hp = math.max(0, obj.hp - 15)
+      obj.invuln = 0.6
+      engine.damage_text(obj.x, obj.y - 12, "-15", "#f43f5e")
+      engine.shake(7, 0.16)
+      engine.sfx("hit")
+    end
+  end
+
+  if engine.collides(obj, "Spike") ~= nil then
+    obj.hp = 0
+  end
+end`;
+
+  const bossLua = `-- Multi-Phase Arena Boss (Phase 2 Rage below 50% HP + Radial Barrage + Dash Slam)
+function on_start(obj)
+  obj.hp = 24
+  obj.maxHp = 24
+  obj.grav = true
+  obj.cd = 1.6
+  obj.dash_t = 0
+  obj.hit_flash = 0
+  obj.phase2 = false
+end
+
+function on_update(obj, dt)
+  if obj.hit_flash > 0 then
+    obj.hit_flash = obj.hit_flash - dt
+    if obj.hit_flash <= 0 then
+      obj.color = obj.phase2 and "#dc2626" or "#991b1b"
+    end
+  end
+
+  if not obj.phase2 and obj.hp <= obj.maxHp * 0.5 then
+    obj.phase2 = true
+    obj.color = "#dc2626"
+    engine.shake(10, 0.3)
+    engine.damage_text(obj.x, obj.y - 18, "PHASE 2 RAGE!", "#f43f5e")
+    engine.sfx("explosion")
+  end
+
+  local pl = engine.find("Player")
+  if pl ~= nil then
+    local dx = (pl.x + pl.w * 0.5) - (obj.x + obj.w * 0.5)
+    local dist = math.abs(dx)
+    obj.flipX = dx < 0
+
+    if obj.dash_t > 0 then
+      obj.dash_t = obj.dash_t - dt
+    elseif dist < 560 then
+      local spd = obj.phase2 and 145 or 95
+      obj.vx = (dx > 0 and 1 or -1) * spd
+      obj.cd = obj.cd - dt
+      if obj.cd <= 0 then
+        obj.cd = obj.phase2 and 1.35 or 2.0
+        if dist < 240 and obj.grounded then
+          obj.dash_t = 0.38
+          obj.vx = (dx > 0 and 1 or -1) * (obj.phase2 and 440 or 340)
+          obj.vy = -260
+          engine.sfx("grapple")
+        else
+          local cx = obj.x + obj.w * 0.5
+          local cy = obj.y + obj.h * 0.4
+          local baseAng = math.atan((pl.y + pl.h * 0.5) - cy, dx)
+          local spread = obj.phase2 and {-0.28, 0, 0.28} or {-0.14, 0.14}
+          for i = 1, #spread do
+            local a = baseAng + spread[i]
+            engine.spawn("EnemyBullet", cx - 6, cy - 6, 12, 12, "#f43f5e", math.cos(a) * 320, math.sin(a) * 320, 2.5)
+          end
+          engine.sfx("laser")
+        end
+      end
+    else
+      obj.vx = 0
+    end
+  end
+
+  local b = engine.collides(obj, "Bullet")
+  local slash = engine.collides(obj, "Slash")
+  if b ~= nil or slash ~= nil then
+    local dmg = 1
+    if b ~= nil then
+      engine.destroy(b)
+      engine.damage_text(obj.x + 12, obj.y - 10, "-1", "#fde047")
+    end
+    if slash ~= nil then
+      dmg = 2
+      engine.hitstop(0.04)
+      engine.damage_text(obj.x + 12, obj.y - 14, "-2 CRIT!", "#38bdf8")
+    end
+    obj.hp = obj.hp - dmg
+    obj.color = "#ffffff"
+    obj.hit_flash = 0.08
+    engine.sfx("hit")
+    if obj.hp <= 0 then
+      engine.particles(obj.x + obj.w * 0.5, obj.y + obj.h * 0.5, "#ef4444", 36)
+      engine.shake(12, 0.35)
+      engine.spawn("Goal", obj.x + 14, obj.y + obj.h - 56, 34, 56, "#a855f7", 0, 0, 0)
+      engine.destroy(obj)
+      engine.sfx("explosion")
+    end
+  end
+end`;
+
+  const npcDialogueLua = `-- Interactive NPC Guide (Press E when nearby to talk)
+function on_start(obj)
+  obj.talk_cd = 0
+  obj.talked = false
+end
+
+function on_update(obj, dt)
+  obj.talk_cd = math.max(0, obj.talk_cd - dt)
+  local pl = engine.find("Player")
+  if pl ~= nil and engine.collides(obj, "Player") ~= nil then
+    if input.is_down("e") and obj.talk_cd <= 0 then
+      obj.talk_cd = 0.6
+      if not obj.talked then
+        obj.talked = true
+        engine.say(obj.name, "Welcome! Use the Bounce Pad ahead, grab the SPEED boots, and press E near the blue ring to grapple!")
+      else
+        engine.say(obj.name, "Watch out for the Arena Boss guarding the Goal Portal at the end!")
+      end
+    end
+  end
+end`;
+
+  const attackerEnemyLua = `-- Autonomous Parkour & Slope AI (Hitstop + Floating Damage Numbers)
+function on_start(obj)
+  obj.hp = 3
+  obj.maxHp = 3
+  obj.speed = 135
+  obj.hanging = false
+  if not obj.topDown then obj.grav = true end
+  obj.hit_flash = 0
+  obj.stun_t = 0
+  obj.attack_cd = 1.2
+end
+
+function on_update(obj, dt)
+  if obj.hit_flash > 0 then
+    obj.hit_flash = obj.hit_flash - dt
+    if obj.hit_flash <= 0 then
+      obj.color = obj.hanging and "#38bdf8" or "#ef4444"
+    end
+  end
+  obj.stun_t = math.max(0, obj.stun_t - dt)
+  obj.attack_cd = math.max(0, obj.attack_cd - dt)
+
+  local target = engine.find("Player")
+  if target ~= nil then
+    if obj.stun_t <= 0 then
+      engine.ai_move(obj, target, obj.speed)
+      if obj.hit_flash <= 0 then
+        obj.color = obj.hanging and "#38bdf8" or "#ef4444"
+      end
+    elseif not obj.topDown then
+      obj.grav = true
+      obj.hanging = false
+    end
+
+    local cx = obj.x + obj.w * 0.5
+    local cy = obj.y + obj.h * 0.5
+    local dx = (target.x + target.w * 0.5) - cx
+    local dy = (target.y + target.h * 0.5) - cy
+    local dist = math.sqrt(dx * dx + dy * dy)
+    if dist < 440 and obj.attack_cd <= 0 and not obj.hanging then
+      obj.attack_cd = 1.75
+      local ang = math.atan(dy, dx)
+      local bspd = 310
+      engine.spawn("EnemyBullet", cx - 5, cy - 5, 10, 10, "#f43f5e", math.cos(ang) * bspd, math.sin(ang) * bspd, 2.2)
+      engine.sfx("hit")
+    end
+  end
+
+  local b = engine.collides(obj, "Bullet")
+  local slash = engine.collides(obj, "Slash")
+  if b ~= nil or slash ~= nil then
+    local dmg = 1
+    if b ~= nil then
+      engine.particles(b.x, b.y, "#fde047", 8)
+      engine.destroy(b)
+      engine.damage_text(obj.x, obj.y - 10, "-1", "#fde047")
+    end
+    if slash ~= nil then
+      dmg = 2
+      obj.stun_t = 0.22
+      obj.hanging = false
+      if not obj.topDown then obj.grav = true end
+      engine.hitstop(0.045)
+      engine.damage_text(obj.x, obj.y - 14, "-2 CRIT!", "#38bdf8")
+      engine.particles(obj.x + obj.w * 0.5, obj.y + obj.h * 0.5, "#38bdf8", 12)
+      if target ~= nil then
+        obj.vx = (obj.x > target.x) and 260 or -260
+        if obj.grav then obj.vy = -190 end
+      end
+    end
+    obj.hp = obj.hp - dmg
+    obj.color = "#ffffff"
+    obj.hit_flash = 0.09
+    engine.sfx("hit")
+    if obj.hp <= 0 then
+      engine.particles(obj.x + obj.w * 0.5, obj.y + obj.h * 0.5, "#ef4444", 18)
+      engine.shake(5, 0.12)
+      engine.spawn("Coin", obj.x + 8, obj.y + 4, 20, 20, "#f59e0b", 0, 0, 0)
+      engine.destroy(obj)
+      engine.sfx("explosion")
+    end
+  end
+end`;
+
+  const topDownHeroLua = `-- Top-Down Twin-Stick Hero (Move + Dash + Slash + Blaster)
+function on_start(obj)
+  obj.grav = false
+  obj.topDown = true
+  obj.speed = 220
+  obj.dash_timer = 0
+  obj.dash_cd = 0
+  obj.dashing = false
+  obj.dash_dx = 1
+  obj.dash_dy = 0
+  obj.fire_cd = 0
+  obj.slash_cd = 0
+  obj.invuln = 0
+  obj.hp = 100
+  obj.maxHp = 100
+  obj.score = 0
+end
+
+function on_update(obj, dt)
+  local hud = engine.find("HUD")
+  if hud ~= nil then
+    hud.text = string.format("Score: %d  |  Dash: %s  |  F Slash • Click Shoot", obj.score, obj.dash_cd <= 0 and "READY" or "...")
+  end
+
+  if obj.hp <= 0 then
+    engine.game_over("Final Score: " .. tostring(obj.score))
+    return
+  end
+
+  local ix, iy = 0, 0
+  if input.is_down("a") or input.is_down("arrowleft") then ix = ix - 1; obj.flipX = true end
+  if input.is_down("d") or input.is_down("arrowright") then ix = ix + 1; obj.flipX = false end
+  if input.is_down("w") or input.is_down("arrowup") then iy = iy - 1 end
+  if input.is_down("s") or input.is_down("arrowdown") then iy = iy + 1 end
+
+  local len = math.sqrt(ix * ix + iy * iy)
+  if len > 0 then
+    ix, iy = ix / len, iy / len
+    obj.dash_dx, obj.dash_dy = ix, iy
+  end
+
+  obj.dash_cd = math.max(0, obj.dash_cd - dt)
+  if (input.is_down("space") or input.is_down("shift")) and obj.dash_cd <= 0 then
+    obj.dash_timer = 0.14
+    obj.dash_cd = 0.75
+    obj.dashing = true
+    obj.color = "#60a5fa"
+    engine.sfx("grapple")
+  end
+
+  if obj.dash_timer > 0 then
+    obj.dash_timer = obj.dash_timer - dt
+    obj.vx = obj.dash_dx * 620
+    obj.vy = obj.dash_dy * 620
+    if obj.dash_timer <= 0 then obj.dashing = false; obj.color = "#3b82f6" end
+  else
+    obj.vx = ix * obj.speed
+    obj.vy = iy * obj.speed
+  end
+
+  obj.slash_cd = math.max(0, obj.slash_cd - dt)
+  if input.is_down("f") and obj.slash_cd <= 0 then
+    obj.slash_cd = 0.32
+    local sx = obj.flipX and (obj.x - 32) or (obj.x + obj.w)
+    engine.spawn("Slash", sx, obj.y, 32, obj.h, "#38bdf8", obj.vx, obj.vy, 0.12)
+    engine.sfx("laser")
+  end
+
+  obj.fire_cd = math.max(0, obj.fire_cd - dt)
+  if (input.is_down("mouse1") or input.is_down("e")) and obj.fire_cd <= 0 then
+    obj.fire_cd = 0.18
+    local cx = obj.x + obj.w * 0.5
+    local cy = obj.y + obj.h * 0.5
+    local ang = math.atan(input.mouse_y() - cy, input.mouse_x() - cx)
+    engine.spawn("Bullet", cx - 6, cy - 6, 12, 12, "#fde047", math.cos(ang) * 520, math.sin(ang) * 520, 1.4)
+    engine.sfx("laser")
+  end
+
+  local coin = engine.collides(obj, "Coin")
+  if coin ~= nil then
+    engine.damage_text(coin.x, coin.y - 8, "+25", "#fde047")
+    engine.destroy(coin)
+    obj.score = obj.score + 25
+    engine.sfx("coin")
+  end
+
+  local goal = engine.collides(obj, "Goal")
+  if goal ~= nil then
+    engine.level_complete("Final Score: " .. tostring(obj.score))
+    return
+  end
+
+  obj.invuln = math.max(0, obj.invuln - dt)
+  local enemy = engine.collides(obj, "Enemy")
+  if enemy ~= nil and obj.dash_timer <= 0 and obj.invuln <= 0 then
+    obj.hp = math.max(0, obj.hp - 15)
+    obj.invuln = 0.65
+    engine.damage_text(obj.x, obj.y - 10, "-15", "#ef4444")
+    engine.shake(6, 0.15)
+    engine.sfx("hit")
+  end
+
+  local ebolt = engine.collides(obj, "EnemyBullet")
+  if ebolt ~= nil then
+    engine.destroy(ebolt)
+    if obj.dash_timer <= 0 and obj.invuln <= 0 then
+      obj.hp = math.max(0, obj.hp - 15)
+      obj.invuln = 0.5
+      engine.shake(6, 0.14)
+    end
+  end
+end`;
+
+  const movingPlatLua = `-- Smooth Horizontal Moving Platform (Carries Riders!)
+function on_start(obj)
+  obj.start_x = obj.x
+  obj.range = 120
+  obj.dir = 1
+end
+
+function on_update(obj, dt)
+  obj.vx = obj.dir * 85
+  if obj.x > obj.start_x + obj.range then obj.dir = -1 end
+  if obj.x < obj.start_x - obj.range then obj.dir = 1 end
+end`;
+
+  function buildTemplateScenes(tpl) {
+    if (tpl === "topdown") {
+      return {
+        "Dungeon": [
+          { id: 1, name: "Hero", tag: "Player", x: 140, y: 180, w: 32, h: 32, hp: 100, maxHp: 100, color: "#3b82f6", aid: null, grav: false, topDown: true, solid: true, flipX: false, vx: 0, vy: 0, grounded: false, wallLeft: false, wallRight: false, hanging: false, dashing: false, text: "", script: topDownHeroLua },
+          { id: 2, name: "PathfinderSlime", tag: "Enemy", x: 460, y: 110, w: 34, h: 34, hp: 3, maxHp: 3, color: "#ef4444", aid: null, grav: false, topDown: true, solid: true, flipX: false, vx: 0, vy: 0, grounded: false, wallLeft: false, wallRight: false, hanging: false, dashing: false, text: "", script: attackerEnemyLua },
+          { id: 3, name: "WallNorth", tag: "Wall", x: 40, y: 40, w: 580, h: 20, color: "#334155", aid: null, grav: false, solid: true, flipX: false, vx: 0, vy: 0, grounded: false, wallLeft: false, wallRight: false, hanging: false, dashing: false, text: "", script: "" },
+          { id: 4, name: "WallSouth", tag: "Wall", x: 40, y: 340, w: 580, h: 20, color: "#334155", aid: null, grav: false, solid: true, flipX: false, vx: 0, vy: 0, grounded: false, wallLeft: false, wallRight: false, hanging: false, dashing: false, text: "", script: "" },
+          { id: 5, name: "WallWest", tag: "Wall", x: 40, y: 60, w: 20, h: 280, color: "#334155", aid: null, grav: false, solid: true, flipX: false, vx: 0, vy: 0, grounded: false, wallLeft: false, wallRight: false, hanging: false, dashing: false, text: "", script: "" },
+          { id: 6, name: "WallEast", tag: "Wall", x: 600, y: 60, w: 20, h: 280, color: "#334155", aid: null, grav: false, solid: true, flipX: false, vx: 0, vy: 0, grounded: false, wallLeft: false, wallRight: false, hanging: false, dashing: false, text: "", script: "" },
+          { id: 7, name: "Pillar_1", tag: "Wall", x: 270, y: 140, w: 48, h: 80, color: "#475569", aid: null, grav: false, solid: true, flipX: false, vx: 0, vy: 0, grounded: false, wallLeft: false, wallRight: false, hanging: false, dashing: false, text: "", script: "" },
+          { id: 8, name: "ChestCoin", tag: "Coin", x: 420, y: 190, w: 20, h: 20, color: "#f59e0b", aid: null, grav: false, solid: false, flipX: false, vx: 0, vy: 0, grounded: false, wallLeft: false, wallRight: false, hanging: false, dashing: false, text: "", script: "" },
+          { id: 9, name: "ExitPortal", tag: "Goal", x: 540, y: 260, w: 32, h: 44, color: "#a855f7", aid: null, grav: false, solid: false, flipX: false, vx: 0, vy: 0, grounded: false, wallLeft: false, wallRight: false, hanging: false, dashing: false, text: "", script: "" },
+          { id: 10, name: "HUD", tag: "Text", x: 185, y: 12, w: 260, h: 24, color: "#f8fafc", aid: null, grav: false, solid: false, flipX: false, vx: 0, vy: 0, grounded: false, wallLeft: false, wallRight: false, hanging: false, dashing: false, text: "Score: 0  |  Dash: READY  |  F Slash • Click Shoot", script: "" }
+        ]
+      };
+    }
+    if (tpl === "blank") {
+      return {
+        "MainScene": [
+          { id: 1, name: "Hero", tag: "Player", x: 140, y: 160, w: 34, h: 34, hp: 100, maxHp: 100, color: "#3b82f6", aid: null, grav: true, solid: true, flipX: false, vx: 0, vy: 0, grounded: false, wallLeft: false, wallRight: false, hanging: false, dashing: false, text: "", script: defaultPlayerLua },
+          { id: 2, name: "Ground", tag: "Platform", x: 40, y: 320, w: 640, h: 36, color: "#10b981", aid: null, grav: false, solid: true, flipX: false, vx: 0, vy: 0, grounded: false, wallLeft: false, wallRight: false, hanging: false, dashing: false, text: "", script: "" }
+        ]
+      };
+    }
+    return {
+      "Level1": [
+        { id: 1, name: "Hero", tag: "Player", x: 80, y: 280, w: 34, h: 36, hp: 100, maxHp: 100, color: "#3b82f6", aid: null, grav: true, solid: true, flipX: false, vx: 0, vy: 0, grounded: false, wallLeft: false, wallRight: false, hanging: false, dashing: false, text: "", script: defaultPlayerLua },
+        { id: 2, name: "StartFloor", tag: "Platform", x: 40, y: 360, w: 500, h: 40, color: "#10b981", aid: null, grav: false, solid: true, flipX: false, vx: 0, vy: 0, grounded: false, wallLeft: false, wallRight: false, hanging: false, dashing: false, text: "", script: "" },
+        { id: 3, name: "Scout_NPC", tag: "NPC", x: 170, y: 322, w: 28, h: 38, color: "#38bdf8", aid: null, grav: false, solid: false, flipX: true, vx: 0, vy: 0, grounded: false, wallLeft: false, wallRight: false, hanging: false, dashing: false, text: "", script: npcDialogueLua },
+        { id: 4, name: "SpringPad", tag: "BouncePad", x: 260, y: 346, w: 36, h: 14, color: "#f43f5e", aid: null, grav: false, solid: true, flipX: false, vx: 0, vy: 0, grounded: false, wallLeft: false, wallRight: false, hanging: false, dashing: false, text: "", script: "" },
+        { id: 5, name: "SpeedBoots", tag: "PowerUp", x: 267, y: 210, w: 22, h: 22, color: "#f59e0b", emitter: "sparkle", aid: null, grav: false, solid: false, flipX: false, vx: 0, vy: 0, grounded: false, wallLeft: false, wallRight: false, hanging: false, dashing: false, text: "SPEED", script: "" },
+        { id: 6, name: "CrumbleBridge", tag: "CrumblePlat", x: 370, y: 290, w: 96, h: 16, color: "#d97706", aid: null, grav: false, solid: true, flipX: false, vx: 0, vy: 0, grounded: false, wallLeft: false, wallRight: false, hanging: false, dashing: false, text: "", script: "" },
+        { id: 7, name: "GrappleRing_1", tag: "GrappleAnchor", x: 590, y: 150, w: 22, h: 22, color: "#38bdf8", aid: null, grav: false, solid: false, flipX: false, vx: 0, vy: 0, grounded: false, wallLeft: false, wallRight: false, hanging: false, dashing: false, text: "", script: "" },
+        { id: 8, name: "ArenaFloor", tag: "Platform", x: 700, y: 340, w: 580, h: 48, color: "#10b981", aid: null, grav: false, solid: true, flipX: false, vx: 0, vy: 0, grounded: false, wallLeft: false, wallRight: false, hanging: false, dashing: false, text: "", script: "" },
+        { id: 9, name: "Checkpoint_1", tag: "Checkpoint", x: 740, y: 298, w: 20, h: 42, color: "#f59e0b", aid: null, grav: false, solid: false, flipX: false, vx: 0, vy: 0, grounded: false, wallLeft: false, wallRight: false, hanging: false, dashing: false, text: "", script: "" },
+        { id: 10, name: "IronGolem_BOSS", tag: "Boss", x: 1080, y: 268, w: 62, h: 72, hp: 24, maxHp: 24, color: "#991b1b", emitter: "fire", aid: null, grav: true, solid: true, flipX: true, vx: 0, vy: 0, grounded: false, wallLeft: false, wallRight: false, hanging: false, dashing: false, text: "", script: bossLua },
+        { id: 11, name: "HUD", tag: "Text", x: 185, y: 14, w: 460, h: 24, color: "#f8fafc", aid: null, grav: false, solid: false, flipX: false, vx: 0, vy: 0, grounded: false, wallLeft: false, wallRight: false, hanging: false, dashing: false, text: "Score: 0 | E Grapple/Talk | Shift Dash | F Slash", script: "" }
+      ]
+    };
+  }
+
+  function getFreshProjects() {
+    return [
+      { id: 1, name: "Parkour Adventure: Boss & NPCs", tpl: "Boss + NPCs + Bounce Pads + BGM", scenes: buildTemplateScenes("platformer"), assets: [], prefabs: [] },
+      { id: 2, name: "Top-Down Dungeon RPG", tpl: "Whisker Obstacle-Avoidance AI", scenes: buildTemplateScenes("topdown"), assets: [], prefabs: [] }
+    ];
+  }
+
+  let projs = getFreshProjects();
+  const STORAGE_KEY = "hybrid_engine_ultimate_v9";
+
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed) && parsed.length) projs = parsed;
+    }
+  } catch (e) {}
+
+  function resetDefaultProjects() {
+    projs = getFreshProjects();
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(projs)); } catch (e) {}
+    drawHub();
+  }
+
+  function saveStorage() {
+    try {
+      const p = projs.find(x => x.id === activeProjId);
+      if (p) {
+        p.scenes = scenes;
+        p.world = worldCfg;
+        p.sfx = sfxPresets;
+        p.bgm = bgmCfg;
+        p.prefabs = prefabs;
+        p.assets = assets.map(a => ({
+          id: a.id, name: a.name, cat: a.cat, fps: a.fps, src: a.src,
+          frameSrcs: a.frames.map(im => im.src)
+        }));
+      }
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(projs));
+    } catch (e) {}
+  }
+
+  function hydrateAssets(rawAssets) {
+    assets = [];
+    if (!Array.isArray(rawAssets)) return;
+    rawAssets.forEach(ra => {
+      const srcs = Array.isArray(ra.frameSrcs) && ra.frameSrcs.length ? ra.frameSrcs : [ra.src];
+      const imgs = srcs.map(s => { const im = new Image(); im.src = s; return im; });
+      assets.push({ id: ra.id, name: ra.name, cat: ra.cat, fps: ra.fps || 6, src: ra.src, frames: imgs });
+    });
+  }
+
+  let activeProjId = projs[0].id;
+  let selectedTpl = "platformer";
+  let assets = [], impType = "Sprite";
+  let dTab = "assets", logs = [hasRealLua ? "[HybridEngine Ultimate] Full Lua VM + Bosses + NPCs + BGM + Gamepad Ready!" : "[HybridEngine] Offline Lua runtime active."];
+  document.getElementById("vm-status").textContent = hasRealLua ? "● Full 2D Lua VM + Bosses + Dialogue + BGM + Gamepad Ready" : "● Offline Lua Runtime Ready";
+
+  scenes = projs[0].scenes;
+  curScene = Object.keys(scenes)[0];
+  nodes = scenes[curScene];
+  let sel = 1, snap = true, play = false, camFollow = true, savedScenes = null, drag = null, resizeHandle = null, dragMoved = false, panDrag = false, off = { x: 0, y: 0 }, origBox = null, cam = { x: 0, y: 0, zoom: 1 }, luaRunners = {}, errLogged = {};
+
+  /* ==================== UNDO / REDO SCENE HISTORY ==================== */
+  let undoStack = [], redoStack = [];
+  function pushUndo() {
+    if (play) return;
+    undoStack.push(JSON.stringify(nodes));
+    if (undoStack.length > 30) undoStack.shift();
+    redoStack = [];
+    updateHistoryBtns();
+  }
+  function updateHistoryBtns() {
+    const u = document.getElementById("undobtn");
+    const r = document.getElementById("redobtn");
+    if (u) u.disabled = undoStack.length === 0;
+    if (r) r.disabled = redoStack.length === 0;
+  }
+  function undoScene() {
+    if (play || !undoStack.length) return;
+    redoStack.push(JSON.stringify(nodes));
+    scenes[curScene] = nodes = JSON.parse(undoStack.pop());
+    if (!nodes.find(n => n.id === sel)) sel = nodes[0] ? nodes[0].id : null;
+    updateHistoryBtns(); drawTree(); drawInsp(); saveStorage();
+  }
+  function redoScene() {
+    if (play || !redoStack.length) return;
+    undoStack.push(JSON.stringify(nodes));
+    scenes[curScene] = nodes = JSON.parse(redoStack.pop());
+    if (!nodes.find(n => n.id === sel)) sel = nodes[0] ? nodes[0].id : null;
+    updateHistoryBtns(); drawTree(); drawInsp(); saveStorage();
+  }
+
+  function resetCam() {
+    cam = { x: 0, y: 0, zoom: 1 };
+    const zb = document.getElementById("zoom-btn");
+    if (zb) zb.textContent = "100%";
+  }
+
+  function changeZoom(delta) {
+    cam.zoom = Math.max(0.4, Math.min(2.2, +(cam.zoom + delta).toFixed(2)));
+    const zb = document.getElementById("zoom-btn");
+    if (zb) zb.textContent = Math.round(cam.zoom * 100) + "%";
+  }
+
+  function toggleTileBrush() {
+    if (play) return;
+    tileBrushMode = !tileBrushMode;
+    const bb = document.getElementById("brushbtn");
+    if (bb) bb.classList.toggle("on", tileBrushMode);
+    if (tileBrushMode && !activeBrushAssetId && assets.length) activeBrushAssetId = assets[0].id;
+    drawDrawer();
+  }
+
+  function logOut(msg) {
+    logs.push(String(msg));
+    if (logs.length > 60) logs.shift();
+    if (dTab === "console") drawDrawer();
+  }
+
+  const luaInputAPI = {
+    is_down: k => isInputActive(k),
+    mouse_x: () => mouse.x,
+    mouse_y: () => mouse.y
+  };
+  const luaEngineAPI = {
+    find: tag => nodes.find(o => !destroyQueue.has(o.id) && (o.tag === tag || o.name === tag)) || null,
+    ledge_at: (x, y, pad = 36) => findLedgeAt(x, y, pad),
+    grapple_nearest: (o, rng = 290) => grappleNearest(o, rng),
+    release_grapple: o => releaseGrapple(o),
+    ai_move: (o, target, spd = 135) => runAutonomousParkourAI(o, target, spd),
+    ray_wall: (o, dir = 1, dist = 40) => {
+      if (!o) return false;
+      const fx = dir > 0 ? (o.x + o.w) : o.x;
+      return !!rayHitSolid(o, fx, o.y + o.h * 0.5, fx + dir * dist, o.y + o.h * 0.5);
+    },
+    ground_ahead: (o, dir = 1) => o ? hasGroundAhead(o, dir) : false,
+    collides: (a, tag) => nodes.find(o => o.id !== a.id && !destroyQueue.has(o.id) && (!tag || o.tag === tag || o.name === tag) && a.x < o.x + o.w && a.x + a.w > o.x && a.y < o.y + o.h && a.y + a.h > o.y) || null,
+    destroy: target => { if (target) queueDestroy(target.id); },
+    spawn: (tag, x, y, w = 12, h = 12, color = "#f59e0b", vx = 0, vy = 0, life = 0) => {
+      const obj = { id: Date.now() + Math.random(), name: tag, tag, x, y, w, h, color, aid: null, grav: false, solid: false, flipX: false, vx, vy, grounded: false, wallLeft: false, wallRight: false, hanging: false, dashing: false, text: "", script: "", life };
+      nodes.push(obj); return obj;
+    },
+    say: (speaker, text) => queueDialogue(speaker, text),
+    camera_zoom: z => { cam.zoom = Math.max(0.4, Math.min(2.2, z || 1)); },
+    sound: (freq, dur) => playTone(freq, dur),
+    sfx: name => playSfx(name),
+    particles: (x, y, col, n) => spawnParticles(x, y, col, n),
+    damage_text: (x, y, txt, col) => spawnDamageText(x, y, txt, col),
+    hitstop: dur => triggerHitstop(dur),
+    shake: (mag, dur) => triggerShake(mag, dur),
+    game_over: msg => triggerGameOver(msg),
+    level_complete: msg => triggerLevelComplete(msg),
+    load_scene: name => requestSceneTransition(name)
+  };
+
+  /* Hub & New Project Creator */
+  function drawHub() {
+    document.getElementById("pgrid").innerHTML = projs.map(p => `
+      <div class="card">
+        <strong>${p.name}</strong>
+        <span style="font-size:12px;color:#64748b">${p.tpl} • ${Object.keys(p.scenes).length} Scene(s)</span>
+        <div class="card-actions">
+          <button class="btn blue" style="flex:1" onclick="openProjectById(${p.id})">Open Project</button>
+          ${projs.length > 1 ? `<button class="btn red" onclick="deleteProject(${p.id})">✕</button>` : ''}
+        </div>
+      </div>`).join("");
+  }
+
+  function openNewProjModal(tpl = "platformer") {
+    pickTpl(tpl);
+    document.getElementById("np-name").value = "ParkourAdventure_" + (projs.length + 1);
+    document.getElementById("npmod").classList.add("open");
+    setTimeout(() => document.getElementById("np-name").select(), 30);
+  }
+  function closeNewProjModal() { document.getElementById("npmod").classList.remove("open"); }
+  function pickTpl(tpl) {
+    selectedTpl = tpl;
+    ["platformer", "topdown", "blank"].forEach(k => document.getElementById("tpl-" + k).classList.toggle("on", k === tpl));
+  }
+  function confirmCreateProject() {
+    const rawName = document.getElementById("np-name").value.trim();
+    const name = rawName || ("ParkourAdventure_" + (projs.length + 1));
+    const labels = { topdown: "Whisker Obstacle-Avoidance AI", platformer: "Boss + NPCs + Bounce Pads + BGM", blank: "Blank 2D Project" };
+    const newP = {
+      id: Date.now(), name, tpl: labels[selectedTpl] || "Boss + NPCs + Bounce Pads + BGM",
+      scenes: buildTemplateScenes(selectedTpl), assets: [], prefabs: []
+    };
+    projs.unshift(newP);
+    saveStorage();
+    closeNewProjModal();
+    openProjectById(newP.id);
+    logOut(`[Project] Created "${name}" (${newP.tpl})`);
+  }
+  function deleteProject(id) {
+    if (projs.length <= 1) return;
+    projs = projs.filter(p => p.id !== id);
+    saveStorage();
+    drawHub();
+  }
+  function openProjectById(id) {
+    const p = projs.find(x => x.id === id) || projs[0];
+    if (!p) return;
+    activeProjId = p.id;
+    scenes = p.scenes;
+    worldCfg = Object.assign({
+      gravity: 1150, skyTop: "#090d16", skyBot: "#111927", showGrid: true,
+      useTitleScreen: false, titleHeading: p.name.toUpperCase(), titleSub: "Press Start or Enter to Begin",
+      p1Color: "#141d2e", p1Speed: 0.22, p1Style: "mountains",
+      p2Color: "#1c283e", p2Speed: 0.48, p2Style: "ruins"
+    }, p.world || {});
+    if (p.sfx) sfxPresets = Object.assign(sfxPresets, p.sfx);
+    if (p.bgm) bgmCfg = Object.assign(bgmCfg, p.bgm);
+    prefabs = Array.isArray(p.prefabs) ? p.prefabs : [];
+    hydrateAssets(p.assets || []);
+    curScene = Object.keys(scenes)[0];
+    nodes = scenes[curScene];
+    sel = nodes[0] ? nodes[0].id : null;
+    undoStack = []; redoStack = []; updateHistoryBtns();
+    document.getElementById("ed-proj-title").textContent = p.name;
+    document.getElementById("hub").style.display = "none";
+    document.getElementById("ed").style.display = "flex";
+    clearAllOverlays();
+    refreshSceneSelect(); resVp(); resetCam(); drawTree(); drawInsp(); drawDrawer();
+  }
+  function toHub() {
+    if (play) togglePlay();
+    bgmPreviewing = false;
+    saveStorage();
+    document.getElementById("ed").style.display = "none";
+    document.getElementById("hub").style.display = "flex";
+    drawHub();
+  }
+
+  /* Multi-Scene Switcher */
+  function refreshSceneSelect() {
+    document.getElementById("scene-sel").innerHTML = Object.keys(scenes).map(s => `<option value="${s}" ${s === curScene ? 'selected' : ''}>Scene: ${s}</option>`).join("");
+  }
+  function switchScene(name) {
+    if (!scenes[name]) return;
+    curScene = name;
+    nodes = scenes[curScene];
+    sel = nodes[0] ? nodes[0].id : null;
+    undoStack = []; redoStack = []; updateHistoryBtns();
+    clearAllOverlays();
+    refreshSceneSelect(); drawTree(); drawInsp();
+    if (play) bootLuaScripts();
+  }
+  function newScene() {
+    const name = "Level" + (Object.keys(scenes).length + 1);
+    scenes[name] = [
+      { id: Date.now(), name: "Hero", tag: "Player", x: 120, y: 140, w: 34, h: 36, hp: 100, maxHp: 100, color: "#3b82f6", aid: null, grav: true, solid: true, flipX: false, vx: 0, vy: 0, grounded: false, wallLeft: false, wallRight: false, hanging: false, dashing: false, text: "", script: defaultPlayerLua },
+      { id: Date.now() + 1, name: "Floor", tag: "Platform", x: 40, y: 340, w: 680, h: 40, color: "#10b981", aid: null, grav: false, solid: true, flipX: false, vx: 0, vy: 0, grounded: false, wallLeft: false, wallRight: false, hanging: false, dashing: false, text: "", script: "" },
+      { id: Date.now() + 2, name: "GoalPortal", tag: "Goal", x: 640, y: 284, w: 34, h: 56, color: "#a855f7", aid: null, grav: false, solid: false, flipX: false, vx: 0, vy: 0, grounded: false, wallLeft: false, wallRight: false, hanging: false, dashing: false, text: "", script: "" }
+    ];
+    switchScene(name);
+    saveStorage();
+    logOut(`[Scene] Created "${name}"`);
+  }
+
+  /* Lua Script Editor */
+  const blankLua = `function on_start(obj)\n  -- Runs once when Play starts\nend\n\nfunction on_update(obj, dt)\n  -- Runs every frame\nend`;
+  function openScript() {
+    const n = nodes.find(x => x.id === sel); if (!n) return;
+    document.getElementById("sc-target").textContent = `${n.name}.lua`;
+    document.getElementById("sccode").value = n.script || blankLua;
+    document.getElementById("scerr").style.display = "none";
+    document.getElementById("scmod").classList.add("open");
+  }
+  function closeScript() { document.getElementById("scmod").classList.remove("open"); }
+  function insertLuaSnippet(snippet) {
+    const ta = document.getElementById("sccode");
+    const start = ta.selectionStart, end = ta.selectionEnd;
+    ta.value = ta.value.substring(0, start) + snippet + ta.value.substring(end);
+    ta.selectionStart = ta.selectionEnd = start + snippet.length;
+    ta.focus();
+  }
+  function saveScript() {
+    const n = nodes.find(x => x.id === sel); if (!n) return;
+    const code = document.getElementById("sccode").value;
+    try {
+      const runner = createLuaRunner(code, n.name, n.id);
+      pushUndo();
+      n.script = code.trim();
+      delete errLogged[n.id];
+      if (play) {
+        luaRunners[n.id] = runner;
+        if (runner.on_start) runner.on_start(n);
+      } else {
+        saveStorage();
+      }
+      closeScript(); drawTree(); drawInsp();
+      logOut(`[Lua] Saved & compiled ${n.name}.lua`);
+    } catch (e) {
+      const err = document.getElementById("scerr");
+      err.textContent = "Lua Error: " + formatLuaErr(e);
+      err.style.display = "block";
+    }
+  }
+  function snip(type) {
+    const map = { plat: defaultPlayerLua, boss: bossLua, npc: npcDialogueLua, chaser: attackerEnemyLua, topdown: topDownHeroLua, moving_plat: movingPlatLua };
+    document.getElementById("sccode").value = map[type];
+    document.getElementById("scerr").style.display = "none";
+  }
+
+  function bootLuaScripts() {
+    luaRunners = {};
+    errLogged = {};
+    particles = [];
+    dashGhosts = [];
+    floatingTexts = [];
+    destroyQueue.clear();
+    clearAllOverlays();
+    nodes.forEach(n => {
+      n.hanging = false;
+      n.dashing = false;
+      n.grappleId = null;
+      n.onPlatformId = null;
+      n.onSlope = false;
+      n.inWater = false;
+      n.crumbleState = "solid";
+      n.crumbleTimer = 0;
+      if (n.script) {
+        try {
+          const runner = createLuaRunner(n.script, n.name, n.id);
+          luaRunners[n.id] = runner;
+          if (runner.on_start) runner.on_start(n);
+        } catch (e) { logOut(`[Lua Error in ${n.name}.lua] ${formatLuaErr(e)}`); }
+      }
+    });
+  }
+
+  function togglePlay() {
+    play = !play;
+    bgmPreviewing = false;
+    const b = document.getElementById("pbtn");
+    const pb = document.getElementById("pausebtn");
+    if (play) {
+      if (tileBrushMode) toggleTileBrush();
+      if (document.activeElement) document.activeElement.blur();
+      vp.focus();
+      savedScenes = JSON.parse(JSON.stringify(scenes));
+      bgmStep = 0; bgmAccum = 0;
+      bootLuaScripts();
+      if (worldCfg.useTitleScreen) {
+        isTitleOpen = true;
+        document.getElementById("title-main").textContent = worldCfg.titleHeading || "HYBRID ADVENTURE";
+        document.getElementById("title-sub").textContent = worldCfg.titleSub || "Press Start or Enter to Begin";
+        document.getElementById("title-ui").classList.add("open");
+      }
+      b.textContent = "■ Stop"; b.className = "btn red";
+      if (pb) pb.style.display = "inline-flex";
+      logOut("[Runtime] Simulation started.");
+    } else {
+      clearAllOverlays();
+      scenes = savedScenes;
+      const p = projs.find(x => x.id === activeProjId);
+      if (p) p.scenes = scenes;
+      nodes = scenes[curScene];
+      luaRunners = {};
+      particles = [];
+      dashGhosts = [];
+      floatingTexts = [];
+      destroyQueue.clear();
+      b.textContent = "▶ Play"; b.className = "btn green";
+      if (pb) { pb.style.display = "none"; pb.classList.remove("on"); }
+      resetCam();
+      drawTree(); drawInsp();
+      logOut("[Runtime] Simulation stopped.");
+    }
+  }
+
+  /* ==================== IMAGE, ZIP & SPRITE SHEET SLICER ==================== */
+  function startImp(t) { impType = t; document.getElementById("fimp").click(); }
+  function loadImageFromSrc(src) {
+    return new Promise((resolve, reject) => {
+      const im = new Image(); im.onload = () => resolve(im); im.onerror = reject; im.src = src;
+    });
+  }
+  function readFileAsDataURL(file) {
+    return new Promise((resolve, reject) => {
+      const r = new FileReader(); r.onload = ev => resolve(ev.target.result); r.onerror = reject; r.readAsDataURL(file);
+    });
+  }
+
+  async function impFile(e) {
+    const fileList = Array.from(e.target.files || []);
+    if (!fileList.length) return;
+    let importedCount = 0;
+
+    for (const f of fileList) {
+      const lower = f.name.toLowerCase();
+      if (lower.endsWith(".zip") || f.type === "application/zip" || f.type === "application/x-zip-compressed") {
+        if (typeof window.JSZip === "undefined") { logOut("[Import Error] JSZip library unavailable offline."); continue; }
+        try {
+          const zip = await window.JSZip.loadAsync(f);
+          const entries = Object.values(zip.files)
+            .filter(entry => !entry.dir && !entry.name.startsWith("__MACOSX/") && /\.(png|jpg|jpeg|gif|webp|bmp)$/i.test(entry.name))
+            .sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
+
+          const folders = {};
+          for (const entry of entries) {
+            const parts = entry.name.split("/");
+            const folderKey = parts.length > 1 ? parts[parts.length - 2] : "";
+            if (!folders[folderKey]) folders[folderKey] = [];
+            folders[folderKey].push(entry);
+          }
+
+          for (const [folderName, group] of Object.entries(folders)) {
+            if (folderName && group.length > 1 && impType === "Sprite") {
+              const imgs = [];
+              for (const entry of group) {
+                const ext = entry.name.split(".").pop().toLowerCase();
+                const mime = ext === "jpg" || ext === "jpeg" ? "image/jpeg" : ext === "gif" ? "image/gif" : ext === "webp" ? "image/webp" : "image/png";
+                const b64 = await entry.async("base64");
+                imgs.push(await loadImageFromSrc(`data:${mime};base64,${b64}`));
+              }
+              assets.push({ id: Date.now() + Math.random(), name: folderName, cat: impType, frames: imgs, fps: 8, src: imgs[0].src });
+              importedCount++;
+            } else {
+              for (const entry of group) {
+                const ext = entry.name.split(".").pop().toLowerCase();
+                const mime = ext === "jpg" || ext === "jpeg" ? "image/jpeg" : ext === "gif" ? "image/gif" : ext === "webp" ? "image/webp" : "image/png";
+                const b64 = await entry.async("base64");
+                const src = `data:${mime};base64,${b64}`;
+                const im = await loadImageFromSrc(src);
+                const cleanName = entry.name.split("/").pop().replace(/\.[^.]+$/, "");
+                assets.push({ id: Date.now() + Math.random(), name: cleanName, cat: impType, frames: [im], fps: 6, src });
+                importedCount++;
+              }
+            }
+          }
+          logOut(`[ZIP Import] Extracted ${importedCount} ${impType}(s) from "${f.name}".`);
+        } catch (err) { logOut(`[ZIP Error] Could not read "${f.name}": ${err.message}`); }
+      } else if (f.type.startsWith("image/") || /\.(png|jpg|jpeg|gif|webp|bmp)$/i.test(lower)) {
+        try {
+          const src = await readFileAsDataURL(f);
+          const im = await loadImageFromSrc(src);
+          assets.push({ id: Date.now() + Math.random(), name: f.name.replace(/\.[^.]+$/, ""), cat: impType, frames: [im], fps: 6, src });
+          importedCount++;
+        } catch (err) { logOut(`[Import Error] Failed to load "${f.name}".`); }
+      }
+    }
+
+    if (importedCount > 0) {
+      if (!activeBrushAssetId && assets.length) activeBrushAssetId = assets[0].id;
+      saveStorage(); drawDrawer(); drawInsp(); refreshPxAssetSelect();
+    }
+    e.target.value = "";
+  }
+
+  function applyAsset(aid) {
+    activeBrushAssetId = aid;
+    if (tileBrushMode) { drawDrawer(); return; }
+    const n = nodes.find(x => x.id === sel);
+    if (n) { pushUndo(); n.aid = aid; saveStorage(); drawInsp(); drawDrawer(); }
+  }
+
+  function deleteAsset(aid, ev) {
+    if (ev) ev.stopPropagation();
+    const target = assets.find(a => String(a.id) === String(aid));
+    if (!target) return;
+    assets = assets.filter(a => String(a.id) !== String(aid));
+    Object.values(scenes).forEach(list => list.forEach(n => {
+      if (String(n.aid) === String(aid)) n.aid = null;
+      if (String(n.run_aid) === String(aid)) n.run_aid = null;
+      if (String(n.jump_aid) === String(aid)) n.jump_aid = null;
+      if (String(n.hang_aid) === String(aid)) n.hang_aid = null;
+    }));
+    saveStorage(); drawDrawer(); drawInsp(); refreshPxAssetSelect();
+    logOut(`[Assets] Deleted "${target.name}".`);
+  }
+
+  function deleteSelectedPxAsset() {
+    const selEl = document.getElementById("px-asset-sel");
+    if (selEl && selEl.value) deleteAsset(selEl.value);
+  }
+
+  function saveSelectedAsPrefab() {
+    const n = nodes.find(x => x.id === sel);
+    if (!n) return;
+    const bp = JSON.parse(JSON.stringify(n));
+    bp.prefabId = Date.now() + Math.random();
+    prefabs.push(bp);
+    saveStorage();
+    setDTab("prefabs", document.querySelectorAll(".dtab")[1]);
+    logOut(`[Prefab] Saved "${n.name}" to Prefabs library.`);
+  }
+
+  function spawnPrefab(prefabId) {
+    if (play) return;
+    const bp = prefabs.find(p => p.prefabId === prefabId);
+    if (!bp) return;
+    pushUndo();
+    const inst = JSON.parse(JSON.stringify(bp));
+    delete inst.prefabId;
+    inst.id = Date.now() + Math.random();
+    inst.name = bp.name + "_" + (nodes.length + 1);
+    inst.x = Math.round((-cam.x + vp.width * 0.4) / 16) * 16;
+    inst.y = Math.round((-cam.y + vp.height * 0.4) / 16) * 16;
+    nodes.push(inst);
+    sel = inst.id;
+    drawTree(); drawInsp(); saveStorage();
+  }
+
+  function deletePrefab(prefabId, ev) {
+    if (ev) ev.stopPropagation();
+    prefabs = prefabs.filter(p => p.prefabId !== prefabId);
+    saveStorage(); drawDrawer();
+  }
+
+  /* ==================== PIXEL ANIMATOR & SPRITE SHEET SLICER ==================== */
+  const pxc = document.getElementById("pxc"), pxctx = pxc.getContext("2d");
+  const animc = document.getElementById("animc"), actx = animc.getContext("2d");
+  let gsz = 16, frames = [], fcur = 0, tool = "pen", pdown = false;
+  const cols = ["#ffffff", "#94a3b8", "#0f172a", "#ef4444", "#f97316", "#f59e0b", "#10b981", "#3b82f6", "#8b5cf6", "#ec4899", "#78350f", "#fde047"];
+  document.getElementById("pal").innerHTML = cols.map(c => `<div style="height:22px;background:${c};border-radius:4px;cursor:pointer" onclick="document.getElementById('pxcol').value='${c}';setTool('pen')"></div>`).join("");
+
+  function refreshPxAssetSelect() {
+    const selEl = document.getElementById("px-asset-sel");
+    if (!selEl) return;
+    if (!assets.length) { selEl.innerHTML = `<option value="">No imported assets yet</option>`; return; }
+    selEl.innerHTML = assets.map(a => `<option value="${a.id}">${a.name} (${a.cat}, ${a.frames.length}f)</option>`).join("");
+  }
+
+  function imageRegionToGrid(img, sx, sy, sw, sh, targetSize) {
+    const cv = document.createElement("canvas");
+    cv.width = targetSize; cv.height = targetSize;
+    const cx = cv.getContext("2d");
+    cx.imageSmoothingEnabled = false;
+    cx.clearRect(0, 0, targetSize, targetSize);
+    cx.drawImage(img, sx, sy, sw, sh, 0, 0, targetSize, targetSize);
+    const data = cx.getImageData(0, 0, targetSize, targetSize).data;
+    const grid = blank(targetSize);
+    const toHex = n => n.toString(16).padStart(2, "0");
+    for (let y = 0; y < targetSize; y++) {
+      for (let x = 0; x < targetSize; x++) {
+        const idx = (y * targetSize + x) * 4;
+        if (data[idx + 3] > 25) grid[y][x] = `#${toHex(data[idx])}${toHex(data[idx + 1])}${toHex(data[idx + 2])}`;
+      }
+    }
+    return grid;
+  }
+
+  function loadImportedIntoPx() {
+    const selEl = document.getElementById("px-asset-sel");
+    if (!selEl || !selEl.value) return;
+    const asset = assets.find(a => String(a.id) === String(selEl.value));
+    if (!asset || !asset.frames.length) return;
+    const natW = asset.frames[0].naturalWidth || asset.frames[0].width || 16;
+    const natH = asset.frames[0].naturalHeight || asset.frames[0].height || 16;
+    const targetSize = natW >= 24 ? 32 : 16;
+    gsz = targetSize;
+    document.getElementById("pxsz").value = String(targetSize);
+    frames = asset.frames.map(im => imageRegionToGrid(im, 0, 0, im.naturalWidth || natW, im.naturalHeight || natH, targetSize));
+    fcur = 0;
+    document.getElementById("aname").value = asset.name + "_edit";
+    document.getElementById("pxcat").value = asset.cat;
+    document.getElementById("afps").value = asset.fps || 6;
+    drawPx(); drawStrip();
+  }
+
+  function sliceSelectedSheet() {
+    const selEl = document.getElementById("px-asset-sel");
+    if (!selEl || !selEl.value) return;
+    const asset = assets.find(a => String(a.id) === String(selEl.value));
+    if (!asset || !asset.frames.length) return;
+    const im = asset.frames[0];
+    const cCount = Math.max(1, Number(document.getElementById("slice-cols").value) || 4);
+    const rCount = Math.max(1, Number(document.getElementById("slice-rows").value) || 1);
+    const sw = Math.floor((im.naturalWidth || im.width) / cCount);
+    const sh = Math.floor((im.naturalHeight || im.height) / rCount);
+    if (sw < 1 || sh < 1) return;
+    const targetSize = sw >= 24 ? 32 : 16;
+    gsz = targetSize;
+    document.getElementById("pxsz").value = String(targetSize);
+    const sliced = [];
+    for (let r = 0; r < rCount; r++) {
+      for (let c = 0; c < cCount; c++) {
+        sliced.push(imageRegionToGrid(im, c * sw, r * sh, sw, sh, targetSize));
+      }
+    }
+    frames = sliced;
+    fcur = 0;
+    document.getElementById("aname").value = asset.name + "_anim";
+    document.getElementById("pxcat").value = "Sprite";
+    drawPx(); drawStrip();
+    logOut(`[Slicer] Sliced "${asset.name}" into ${sliced.length} animation frames.`);
+  }
+
+  function blank(s) { return Array.from({ length: s }, () => Array(s).fill(null)); }
+  function initPx(s) { gsz = s; frames = [blank(s)]; fcur = 0; drawPx(); drawStrip(); }
+  function openPx() {
+    document.getElementById("pxmod").classList.add("open");
+    refreshPxAssetSelect();
+    if (!frames.length) initPx(16);
+    drawPx(); drawStrip();
+  }
+  function closePx() { document.getElementById("pxmod").classList.remove("open"); }
+  function setTool(t) { tool = t; ["pen", "erase", "fill"].forEach((k, i) => document.getElementById(["tp", "te", "tf"][i]).classList.toggle("on", k === t)); }
+  function addF() { frames.push(blank(gsz)); fcur = frames.length - 1; drawPx(); drawStrip(); }
+  function dupF() { frames.splice(fcur + 1, 0, frames[fcur].map(r => [...r])); fcur++; drawPx(); drawStrip(); }
+  function delF() { if (frames.length > 1) { frames.splice(fcur, 1); fcur = Math.max(0, fcur - 1); drawPx(); drawStrip(); } }
+
+  function fill(x, y, tc, rc) {
+    if (tc === rc || x < 0 || x >= gsz || y < 0 || y >= gsz || frames[fcur][y][x] !== tc) return;
+    frames[fcur][y][x] = rc; fill(x + 1, y, tc, rc); fill(x - 1, y, tc, rc); fill(x, y + 1, tc, rc); fill(x, y - 1, tc, rc);
+  }
+  function paint(e) {
+    const r = pxc.getBoundingClientRect(), c = pxc.width / gsz, x = Math.floor((e.clientX - r.left) / c), y = Math.floor((e.clientY - r.top) / c);
+    if (x < 0 || x >= gsz || y < 0 || y >= gsz) return;
+    const col = document.getElementById("pxcol").value;
+    if (tool === "pen") frames[fcur][y][x] = col;
+    else if (tool === "erase") frames[fcur][y][x] = null;
+    else fill(x, y, frames[fcur][y][x], col);
+    drawPx(); drawStrip();
+  }
+  pxc.onmousedown = e => { pdown = true; paint(e); }; pxc.onmousemove = e => { if (pdown && tool !== "fill") paint(e); };
+  window.onmouseup = () => {
+    if ((drag || resizeHandle || isPaintingTiles) && dragMoved && !play) saveStorage();
+    pdown = false; drag = null; resizeHandle = null; isPaintingTiles = false; dragMoved = false; panDrag = false; mouse.down = false; mouse.rightDown = false;
+  };
+
+  function drawPx() {
+    pxctx.clearRect(0, 0, 320, 320); const c = 320 / gsz, g = frames[fcur];
+    if (fcur > 0) { pxctx.globalAlpha = .2; frames[fcur - 1].forEach((r, y) => r.forEach((v, x) => { if (v) { pxctx.fillStyle = v; pxctx.fillRect(x * c, y * c, c, c); } })); pxctx.globalAlpha = 1; }
+    g.forEach((r, y) => r.forEach((v, x) => { if (v) { pxctx.fillStyle = v; pxctx.fillRect(x * c, y * c, c, c); } }));
+    pxctx.strokeStyle = "rgba(255,255,255,.08)";
+    for (let i = 0; i <= gsz; i++) { pxctx.beginPath(); pxctx.moveTo(i * c, 0); pxctx.lineTo(i * c, 320); pxctx.stroke(); pxctx.beginPath(); pxctx.moveTo(0, i * c); pxctx.lineTo(320, i * c); pxctx.stroke(); }
+  }
+  function drawStrip() {
+    const st = document.getElementById("fstrip"); st.innerHTML = "";
+    frames.forEach((g, i) => {
+      const b = document.createElement("div"); b.className = "fbox" + (i === fcur ? " on" : ""); b.onclick = () => { fcur = i; drawPx(); drawStrip(); };
+      const cv = document.createElement("canvas"); cv.width = gsz; cv.height = gsz; const cx = cv.getContext("2d");
+      g.forEach((r, y) => r.forEach((v, x) => { if (v) { cx.fillStyle = v; cx.fillRect(x, y, 1, 1); } }));
+      b.appendChild(cv); st.appendChild(b);
+    });
+  }
+  function savePx() {
+    const imgs = frames.map(g => { const cv = document.createElement("canvas"); cv.width = gsz; cv.height = gsz; const cx = cv.getContext("2d"); g.forEach((r, y) => r.forEach((v, x) => { if (v) { cx.fillStyle = v; cx.fillRect(x, y, 1, 1); } })); const im = new Image(); im.src = cv.toDataURL(); return im; });
+    const a = { id: Date.now(), name: document.getElementById("aname").value || "Sprite", cat: document.getElementById("pxcat").value, frames: imgs, fps: Math.max(1, Number(document.getElementById("afps").value) || 6), src: imgs[0].src };
+    assets.push(a); applyAsset(a.id); refreshPxAssetSelect(); closePx(); drawDrawer();
+  }
+
+  /* Viewport, 8-Handle Gizmos, Tile Paint Brush & Scene Hierarchy */
+  const vp = document.getElementById("vp"), vctx = vp.getContext("2d");
+  function resVp() { const w = document.getElementById("vwrap"); vp.width = w.clientWidth || 700; vp.height = w.clientHeight || 400; }
+  window.onresize = resVp;
+
+  document.getElementById("sccode").addEventListener("keydown", e => {
+    if (e.key === "Tab") {
+      e.preventDefault();
+      const ta = e.target;
+      const start = ta.selectionStart, end = ta.selectionEnd;
+      ta.value = ta.value.substring(0, start) + "  " + ta.value.substring(end);
+      ta.selectionStart = ta.selectionEnd = start + 2;
+    }
+  });
+
+  window.addEventListener("keydown", e => {
+    if (document.activeElement.tagName !== "TEXTAREA" && document.activeElement.tagName !== "INPUT") {
+      const k = e.key.toLowerCase();
+      if (["arrowup", "arrowdown", "arrowleft", "arrowright", " ", "f3"].includes(k)) e.preventDefault();
+      if (isTitleOpen && (k === "enter" || k === " ")) { dismissTitleScreen(); return; }
+      if (activeDialogue && (k === " " || k === "e" || k === "enter")) { advanceDialogue(); return; }
+      if (k === "f3") {
+        debugSensors = !debugSensors;
+        const db = document.getElementById("dbg-btn");
+        if (db) db.classList.toggle("on", debugSensors);
+        return;
+      }
+      if (k === "escape" && play && !isGameOver && !isLevelWon) { togglePause(); return; }
+      if (k === "r" && play && (isGameOver || isLevelWon)) { retryPlay(); return; }
+      if (!play) {
+        if ((e.ctrlKey || e.metaKey) && k === "z" && !e.shiftKey) { e.preventDefault(); undoScene(); return; }
+        if ((e.ctrlKey || e.metaKey) && (k === "y" || (k === "z" && e.shiftKey))) { e.preventDefault(); redoScene(); return; }
+        if ((e.ctrlKey || e.metaKey) && k === "d") { e.preventDefault(); duplicateSelected(); return; }
+        if (e.key === "Delete" && sel) { delNode(sel); return; }
+        if (sel && ["arrowup", "arrowdown", "arrowleft", "arrowright"].includes(k)) {
+          const n = nodes.find(x => x.id === sel);
+          if (n) {
+            pushUndo();
+            const step = e.shiftKey ? 1 : (snap ? 16 : 4);
+            if (k === "arrowleft") n.x -= step;
+            if (k === "arrowright") n.x += step;
+            if (k === "arrowup") n.y -= step;
+            if (k === "arrowdown") n.y += step;
+            drawInsp(); saveStorage();
+            return;
+          }
+        }
+      }
+      keys[k] = true;
+      if (e.key === " ") keys["space"] = true;
+    }
+  });
+  window.addEventListener("keyup", e => {
+    keys[e.key.toLowerCase()] = false;
+    if (e.key === " ") keys["space"] = false;
+  });
+
+  function addNode(t) {
+    if (play) return;
+    pushUndo();
+    const id = Date.now();
+    const isOneWay = t === "OneWay" || t === "CrumblePlat";
+    const isSlope = t === "SlopeLeft" || t === "SlopeRight";
+    const isPlat = t === "Platform" || isOneWay || isSlope || t === "BouncePad";
+    const isEnemy = t === "Enemy";
+    const isBoss = t === "Boss";
+    const isNPC = t === "NPC";
+    const isPlayer = t === "Player";
+    const nonSolid = ["Coin", "Text", "Spike", "Checkpoint", "HealthPack", "Goal", "GrappleAnchor", "PowerUp", "WaterZone", "NPC"].includes(t);
+    const isTopDownScene = nodes.some(n => n.topDown);
+    const colorMap = {
+      Player: "#3b82f6", Enemy: "#ef4444", Boss: "#991b1b", NPC: "#38bdf8",
+      Coin: "#f59e0b", OneWay: "#38bdf8", BouncePad: "#f43f5e", CrumblePlat: "#d97706",
+      WaterZone: "rgba(56,189,248,0.32)", PowerUp: "#f59e0b",
+      SlopeLeft: "#10b981", SlopeRight: "#10b981", GrappleAnchor: "#38bdf8",
+      Spike: "#f43f5e", Platform: "#10b981", Checkpoint: "#f59e0b", HealthPack: "#10b981", Goal: "#a855f7"
+    };
+    const spawnX = Math.round((-cam.x + vp.width * 0.35) / 16) * 16;
+    const spawnY = Math.round((-cam.y + vp.height * 0.35) / 16) * 16;
+    nodes.push({
+      id,
+      name: (isEnemy ? "ParkourAI" : t) + "_" + (nodes.length + 1),
+      tag: t,
+      x: Math.max(32, spawnX),
+      y: Math.max(32, spawnY),
+      w: isBoss ? 62 : (t === "WaterZone" ? 180 : (isSlope ? 96 : (t === "BouncePad" ? 36 : (isPlat ? 140 : (t === "Coin" || t === "HealthPack" || t === "GrappleAnchor" || t === "PowerUp" ? 22 : (t === "Checkpoint" ? 20 : 32)))))),
+      h: isBoss ? 72 : (t === "WaterZone" ? 110 : (isSlope ? 64 : (t === "BouncePad" ? 14 : (isOneWay ? 16 : (t === "Platform" ? 32 : (t === "Coin" || t === "HealthPack" || t === "GrappleAnchor" || t === "PowerUp" ? 22 : (t === "Goal" ? 56 : (t === "Checkpoint" ? 42 : 36)))))))),
+      hp: isPlayer ? 100 : (isBoss ? 24 : (isEnemy ? 3 : undefined)),
+      maxHp: isPlayer ? 100 : (isBoss ? 24 : (isEnemy ? 3 : undefined)),
+      color: colorMap[t] || "#475569",
+      emitter: "none",
+      aid: null, run_aid: null, jump_aid: null, hang_aid: null,
+      grav: isPlayer || isBoss || (isEnemy && !isTopDownScene),
+      topDown: isTopDownScene,
+      solid: !nonSolid,
+      flipX: false,
+      vx: 0, vy: 0, grounded: false, wallLeft: false, wallRight: false, hanging: false, dashing: false,
+      text: t === "Text" ? "Score: 0" : (t === "PowerUp" ? "SPEED" : ""),
+      script: isBoss ? bossLua : (isNPC ? npcDialogueLua : (isEnemy ? attackerEnemyLua : (isPlayer ? defaultPlayerLua : "")))
+    });
+    sel = id; drawTree(); drawInsp(); saveStorage();
+  }
+
+  function duplicateSelected() {
+    if (play || !sel) return;
+    const orig = nodes.find(x => x.id === sel);
+    if (!orig) return;
+    pushUndo();
+    const copy = JSON.parse(JSON.stringify(orig));
+    copy.id = Date.now() + Math.random();
+    copy.name = orig.name + "_Copy";
+    copy.x += 24;
+    nodes.push(copy);
+    sel = copy.id;
+    drawTree(); drawInsp(); saveStorage();
+  }
+
+  function delNode(id) {
+    if (play) return;
+    pushUndo();
+    scenes[curScene] = nodes = nodes.filter(n => n.id !== id);
+    sel = nodes[0] ? nodes[0].id : null;
+    drawTree(); drawInsp(); saveStorage();
+  }
+
+  function upd(k, v) {
+    const n = nodes.find(x => x.id === sel);
+    if (!n) return;
+    pushUndo();
+    n[k] = v;
+    if (k === "grav") {
+      n.vy = 0; n.grounded = false; n.topDown = !v; drawInsp();
+    }
+    drawTree();
+    if (!play) saveStorage();
+  }
+
+  function getWorldPointer(e) {
+    const r = vp.getBoundingClientRect();
+    return { x: (e.clientX - r.left - cam.x) / cam.zoom, y: (e.clientY - r.top - cam.y) / cam.zoom };
+  }
+
+  function getGizmoHandles(n) {
+    const mx = n.x + n.w * 0.5, my = n.y + n.h * 0.5;
+    return [
+      { id: "nw", x: n.x, y: n.y }, { id: "n", x: mx, y: n.y }, { id: "ne", x: n.x + n.w, y: n.y },
+      { id: "w", x: n.x, y: my }, { id: "e", x: n.x + n.w, y: my },
+      { id: "sw", x: n.x, y: n.y + n.h }, { id: "s", x: mx, y: n.y + n.h }, { id: "se", x: n.x + n.w, y: n.y + n.h }
+    ];
+  }
+
+  function paintTileAt(wx, wy, erase) {
+    const gx = Math.floor(wx / 32) * 32;
+    const gy = Math.floor(wy / 32) * 32;
+    const existingIdx = nodes.findIndex(o => o.isPaintedTile && o.x === gx && o.y === gy);
+    if (erase) {
+      if (existingIdx >= 0) {
+        if (!dragMoved) { pushUndo(); dragMoved = true; }
+        nodes.splice(existingIdx, 1);
+        drawTree();
+      }
+      return;
+    }
+    if (existingIdx >= 0) {
+      if (nodes[existingIdx].aid !== activeBrushAssetId) {
+        if (!dragMoved) { pushUndo(); dragMoved = true; }
+        nodes[existingIdx].aid = activeBrushAssetId;
+      }
+      return;
+    }
+    if (!dragMoved) { pushUndo(); dragMoved = true; }
+    nodes.push({
+      id: Date.now() + Math.random(),
+      name: "Tile_" + (nodes.length + 1),
+      tag: "Platform",
+      isPaintedTile: true,
+      x: gx, y: gy, w: 32, h: 32,
+      color: "#10b981",
+      aid: activeBrushAssetId || null,
+      grav: false, solid: true, flipX: false,
+      vx: 0, vy: 0, grounded: false, wallLeft: false, wallRight: false, hanging: false, dashing: false,
+      text: "", script: ""
+    });
+    drawTree();
+  }
+
+  vp.addEventListener("wheel", e => { e.preventDefault(); changeZoom(e.deltaY < 0 ? 0.1 : -0.1); }, { passive: false });
+  vp.oncontextmenu = e => e.preventDefault();
+  vp.onmousedown = e => {
+    vp.focus();
+    const pt = getWorldPointer(e);
+    mouse.x = pt.x; mouse.y = pt.y;
+    if (e.button === 0) { mouse.down = true; mouse.clicked = true; }
+    if (e.button === 2) {
+      mouse.rightDown = true; mouse.rightClicked = true;
+      if (!play) { panDrag = true; off = { x: e.clientX - cam.x, y: e.clientY - cam.y }; }
+      return;
+    }
+    if (play) return;
+
+    if (tileBrushMode) {
+      isPaintingTiles = true; dragMoved = false;
+      paintTileAt(pt.x, pt.y, e.altKey);
+      return;
+    }
+
+    if (sel) {
+      const sn = nodes.find(x => x.id === sel);
+      if (sn && sn.tag !== "Text") {
+        const hs = getGizmoHandles(sn);
+        const rad = 7 / cam.zoom;
+        const hitH = hs.find(h => Math.abs(pt.x - h.x) <= rad && Math.abs(pt.y - h.y) <= rad);
+        if (hitH) {
+          resizeHandle = hitH.id;
+          dragMoved = false;
+          origBox = { x: sn.x, y: sn.y, w: sn.w, h: sn.h };
+          return;
+        }
+      }
+    }
+
+    for (let i = nodes.length - 1; i >= 0; i--) {
+      const n = nodes[i];
+      if (pt.x >= n.x && pt.x <= n.x + n.w && pt.y >= n.y && pt.y <= n.y + n.h) {
+        sel = n.id; drag = n; dragMoved = false; off = { x: pt.x - n.x, y: pt.y - n.y }; drawTree(); drawInsp(); return;
+      }
+    }
+    sel = null; drawTree(); drawInsp();
+  };
+
+  vp.onmousemove = e => {
+    const pt = getWorldPointer(e);
+    const mx = Math.round(pt.x), my = Math.round(pt.y);
+    mouse.x = pt.x; mouse.y = pt.y;
+    document.getElementById("hud").textContent = play
+      ? `PLAYING • Cursor (${mx}, ${my}) • E Talk/Grapple • Shift Dash • F Slash • Gamepad Active • F3 Debug`
+      : tileBrushMode
+        ? `TILE BRUSH (${mx}, ${my}) • Left-drag paint 32x32 tiles • Alt+Drag erase • Right-drag pan`
+        : `2D Grid (${mx}, ${my}) • Drag handles to resize • Right-drag pan • Scroll zoom • Ctrl+Z Undo`;
+
+    if (panDrag) { cam.x = e.clientX - off.x; cam.y = e.clientY - off.y; return; }
+    if (isPaintingTiles && !play) { paintTileAt(pt.x, pt.y, e.altKey); return; }
+
+    if (resizeHandle && sel && !play) {
+      const sn = nodes.find(x => x.id === sel);
+      if (!sn) return;
+      if (!dragMoved) { pushUndo(); dragMoved = true; }
+      const qx = snap ? Math.round(pt.x / 16) * 16 : Math.round(pt.x);
+      const qy = snap ? Math.round(pt.y / 16) * 16 : Math.round(pt.y);
+      let nx = origBox.x, ny = origBox.y, nw = origBox.w, nh = origBox.h;
+      if (resizeHandle.includes("e")) nw = Math.max(16, qx - origBox.x);
+      if (resizeHandle.includes("s")) nh = Math.max(16, qy - origBox.y);
+      if (resizeHandle.includes("w")) {
+        const right = origBox.x + origBox.w;
+        nx = Math.min(right - 16, qx);
+        nw = right - nx;
+      }
+      if (resizeHandle.includes("n")) {
+        const bot = origBox.y + origBox.h;
+        ny = Math.min(bot - 16, qy);
+        nh = bot - ny;
+      }
+      sn.x = nx; sn.y = ny; sn.w = nw; sn.h = nh;
+      drawInsp();
+      return;
+    }
+
+    if (drag && !play) {
+      if (!dragMoved) { pushUndo(); dragMoved = true; }
+      drag.x = snap ? Math.round((pt.x - off.x) / 16) * 16 : Math.round(pt.x - off.x);
+      drag.y = snap ? Math.round((pt.y - off.y) / 16) * 16 : Math.round(pt.y - off.y);
+      drawInsp();
+    }
+  };
+
+  function drawTree() {
+    document.getElementById("node-count").textContent = nodes.length;
+    document.getElementById("tree").innerHTML = nodes.map(n => `
+      <div class="titem ${n.id === sel ? 'sel' : ''}" onclick="sel=${n.id};drawTree();drawInsp()">
+        <span>${n.name}${n.grav ? '<span class="badge grav-badge">GRAV</span>' : ''}${n.script ? '<span class="badge lua-badge">LUA</span>' : ''}</span>
+        <span style="font-size:10px;color:#64748b">${n.tag}</span>
+      </div>`).join("");
+  }
+  function drawInsp() {
+    const n = nodes.find(x => x.id === sel), box = document.getElementById("insp");
+    if (!n) { box.innerHTML = "<p style='color:#64748b;font-size:12px'>Select an object in the scene</p>"; return; }
+    const makeOpts = curVal => `<option value="">Default / None</option>` + assets.map(a => `<option value="${a.id}" ${curVal === a.id ? 'selected' : ''}>${a.name} (${a.cat})</option>`).join("");
+    const isActor = n.tag === "Player" || n.tag === "Enemy" || n.tag === "Boss" || n.tag === "NPC";
+    box.innerHTML = `
+      <div class="row"><label>Name</label><input type="text" value="${n.name}" onchange="upd('name',this.value)"></div>
+      <div class="row"><label>Tag</label><input type="text" value="${n.tag}" onchange="upd('tag',this.value)"></div>
+      <div class="row"><label>X</label><input type="number" value="${Math.round(n.x)}" onchange="upd('x',+this.value)"></div>
+      <div class="row"><label>Y</label><input type="number" value="${Math.round(n.y)}" onchange="upd('y',+this.value)"></div>
+      <div class="row"><label>Width</label><input type="number" value="${n.w}" onchange="upd('w',Math.max(8,+this.value))"></div>
+      <div class="row"><label>Height</label><input type="number" value="${n.h}" onchange="upd('h',Math.max(8,+this.value))"></div>
+      <div class="row"><label>${isActor ? 'Idle / Base' : 'Sprite / Tile'}</label><select onchange="upd('aid',this.value?+this.value:null)">${makeOpts(n.aid)}</select></div>
+      ${isActor ? `
+        <div class="row"><label>Run Anim</label><select onchange="upd('run_aid',this.value?+this.value:null)">${makeOpts(n.run_aid)}</select></div>
+        <div class="row"><label>Jump Anim</label><select onchange="upd('jump_aid',this.value?+this.value:null)">${makeOpts(n.jump_aid)}</select></div>
+        <div class="row"><label>Hang Anim</label><select onchange="upd('hang_aid',this.value?+this.value:null)">${makeOpts(n.hang_aid)}</select></div>
+      ` : ''}
+      <div class="row"><label>Particle Trail</label><select onchange="upd('emitter',this.value)">
+        ${["none","fire","sparkle","snow","rain"].map(em => `<option value="${em}" ${(n.emitter||'none')===em?'selected':''}>${em}</option>`).join("")}
+      </select></div>
+      <div class="row"><label>Flip Horizontal</label><input type="checkbox" ${n.flipX ? 'checked' : ''} onchange="upd('flipX',this.checked)" style="width:16px"></div>
+      <div class="row"><label>Color</label><input type="color" value="${n.color.startsWith('#')?n.color:'#38bdf8'}" oninput="upd('color',this.value)" style="padding:0;height:26px"></div>
+      <div class="row"><label style="color:#6ee7b7;font-weight:600">Gravity</label><input type="checkbox" ${n.grav ? 'checked' : ''} onchange="upd('grav',this.checked)" style="width:16px"></div>
+      <div class="row"><label>Solid Collider</label><input type="checkbox" ${n.solid ? 'checked' : ''} onchange="upd('solid',this.checked)" style="width:16px"></div>
+      ${(n.tag === "Text" || n.tag === "PowerUp") ? `<div class="row"><label>${n.tag === "PowerUp" ? 'Buff Type' : 'HUD Text'}</label><input type="text" value="${n.text}" oninput="upd('text',this.value)"></div>` : ""}
+      <div class="sec">
+        <div style="font-size:11px;font-weight:700;color:#60a5fa;margin-bottom:8px;text-transform:uppercase">Lua Behavior Script</div>
+        ${n.script
+          ? `<div style="display:flex;gap:6px"><button class="btn blue" style="flex:1" onclick="openScript()">✎ Edit ${n.name}.lua</button><button class="btn red" onclick="upd('script','');drawTree();drawInsp()">✕</button></div>`
+          : `<button class="btn" style="width:100%" onclick="openScript()">+ Attach Lua Script</button>`
+        }
+      </div>
+      <div style="display:flex;gap:6px;margin-top:10px">
+        <button class="btn amber" style="flex:1" onclick="saveSelectedAsPrefab()">★ Save Prefab</button>
+        <button class="btn red" onclick="delNode(${n.id})">🗑 Delete</button>
+      </div>`;
+  }
+
+  function setDTab(t, el) {
+    dTab = t;
+    document.querySelectorAll(".dtab").forEach(x => x.classList.remove("on"));
+    if (el) el.classList.add("on");
+    drawDrawer();
+  }
+
+  function toggleSeqStep(track, idx) {
+    if (track === "lead") bgmCfg.lead[idx] = (bgmCfg.lead[idx] + 1) % BGM_NOTES.length;
+    else bgmCfg.bass[idx] = (bgmCfg.bass[idx] + 1) % BASS_NOTES.length;
+    saveStorage(); drawDrawer();
+  }
+
+  function drawDrawer() {
+    const b = document.getElementById("dbody");
+    if (dTab === "assets") {
+      if (!assets.length) { b.innerHTML = "<span style='font-size:12px;color:#64748b'>Import an image or .ZIP pack (or draw/slice in Pixel Art), then click an asset to apply it or paint with Tile Brush.</span>"; return; }
+      b.innerHTML = `<div class="agrid">${assets.map(a => `
+        <div class="acard ${activeBrushAssetId === a.id ? 'on' : ''}" onclick="applyAsset(${a.id})">
+          <button class="adel" title="Delete ${a.name}" onclick="deleteAsset(${a.id}, event)">✕</button>
+          <img src="${a.src}">
+          <div style="font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${a.name}</div>
+          <div style="font-size:9px;color:#60a5fa">${a.cat} (${a.frames.length}f)</div>
+        </div>`).join("")}</div>`;
+    } else if (dTab === "prefabs") {
+      if (!prefabs.length) { b.innerHTML = "<span style='font-size:12px;color:#64748b'>Select any configured enemy, boss, trap, or platform in the scene and click <strong>★ Save Prefab</strong> in the Inspector to build reusable blueprints.</span>"; return; }
+      b.innerHTML = `<div class="agrid">${prefabs.map(p => `
+        <div class="acard" onclick="spawnPrefab(${p.prefabId})">
+          <button class="adel" onclick="deletePrefab(${p.prefabId}, event)">✕</button>
+          <div style="width:44px;height:44px;margin:0 auto 4px;background:${p.color};border-radius:6px;display:grid;place-items:center;font-weight:800;font-size:11px;color:#fff">${p.tag.slice(0,4)}</div>
+          <div style="font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.name}</div>
+          <div style="font-size:9px;color:#fbbf24">+ Spawn</div>
+        </div>`).join("")}</div>`;
+    } else if (dTab === "bgm") {
+      b.innerHTML = `
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap">
+          <button class="btn ${bgmPreviewing?'red':'green'}" onclick="bgmPreviewing=!bgmPreviewing;bgmStep=0;drawDrawer()">${bgmPreviewing?'■ Stop Loop':'▶ Preview Loop'}</button>
+          <label style="font-size:11px;color:#94a3b8;display:flex;align-items:center;gap:4px"><input type="checkbox" ${bgmCfg.enabled?'checked':''} onchange="bgmCfg.enabled=this.checked;saveStorage()"> Play During Game</label>
+          <label style="font-size:11px;color:#94a3b8;display:flex;align-items:center;gap:4px">BPM <input type="number" min="70" max="220" value="${bgmCfg.bpm}" style="width:56px;padding:2px 5px" onchange="bgmCfg.bpm=+this.value;saveStorage()"></label>
+          <span style="font-size:10.5px;color:#64748b">Click steps to cycle notes:</span>
+        </div>
+        <div class="seq-row"><span style="width:42px;font-size:10px;color:#60a5fa;font-weight:700">LEAD</span>${bgmCfg.lead.map((v,i)=>`<div class="seq-step ${v>0?'on':''}" data-step="${i}" onclick="toggleSeqStep('lead',${i})">${BGM_LABELS[v]}</div>`).join("")}</div>
+        <div class="seq-row"><span style="width:42px;font-size:10px;color:#10b981;font-weight:700">BASS</span>${bgmCfg.bass.map((v,i)=>`<div class="seq-step bass ${v>0?'on':''}" data-step="${i}" onclick="toggleSeqStep('bass',${i})">${BASS_LABELS[v]}</div>`).join("")}</div>`;
+    } else if (dTab === "sfx") {
+      b.innerHTML = `
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">
+          ${Object.entries(sfxPresets).map(([name, cfg]) => `
+            <div style="background:#131824;border:1px solid #263044;border-radius:7px;padding:8px;display:flex;flex-direction:column;gap:5px">
+              <div style="display:flex;justify-content:space-between;align-items:center">
+                <strong style="font-size:11.5px;color:#60a5fa">${name}</strong>
+                <button class="btn green" style="padding:2px 7px;font-size:11px" onclick="playSfx('${name}')">▶ Test</button>
+              </div>
+              <div style="display:flex;gap:4px;align-items:center;font-size:10px;color:#94a3b8">
+                <span>Hz</span><input type="number" value="${cfg.freq}" style="width:52px;padding:2px 4px" onchange="sfxPresets['${name}'].freq=+this.value;saveStorage()">
+                <span>→</span><input type="number" value="${cfg.endFreq}" style="width:52px;padding:2px 4px" onchange="sfxPresets['${name}'].endFreq=+this.value;saveStorage()">
+                <select style="padding:2px" onchange="sfxPresets['${name}'].type=this.value;saveStorage()">
+                  ${["sine","triangle","square","sawtooth"].map(w => `<option value="${w}" ${cfg.type===w?'selected':''}>${w}</option>`).join("")}
+                </select>
+              </div>
+            </div>
+          `).join("")}
+        </div>`;
+    } else if (dTab === "world") {
+      b.innerHTML = `
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">
+          <div><div style="font-size:11px;color:#94a3b8;margin-bottom:4px">Gravity (px/s²)</div><input type="number" step="50" value="${worldCfg.gravity}" oninput="worldCfg.gravity=+this.value;saveStorage()" style="width:100%"></div>
+          <div><div style="font-size:11px;color:#94a3b8;margin-bottom:4px">Sky Top / Bottom</div><div style="display:flex;gap:4px"><input type="color" value="${worldCfg.skyTop}" oninput="worldCfg.skyTop=this.value;saveStorage()" style="flex:1;height:28px;padding:0"><input type="color" value="${worldCfg.skyBot}" oninput="worldCfg.skyBot=this.value;saveStorage()" style="flex:1;height:28px;padding:0"></div></div>
+          <div><div style="font-size:11px;color:#94a3b8;margin-bottom:4px">Parallax Far / Mid</div><div style="display:flex;gap:4px"><select onchange="worldCfg.p1Style=this.value;saveStorage()" style="flex:1"><option value="mountains" ${worldCfg.p1Style==='mountains'?'selected':''}>Mountains</option><option value="city" ${worldCfg.p1Style==='city'?'selected':''}>City</option><option value="none" ${worldCfg.p1Style==='none'?'selected':''}>None</option></select><select onchange="worldCfg.p2Style=this.value;saveStorage()" style="flex:1"><option value="ruins" ${worldCfg.p2Style==='ruins'?'selected':''}>Ruins</option><option value="hills" ${worldCfg.p2Style==='hills'?'selected':''}>Hills</option><option value="none" ${worldCfg.p2Style==='none'?'selected':''}>None</option></select></div></div>
+          <div><div style="font-size:11px;color:#94a3b8;margin-bottom:4px">Title Screen</div><div style="display:flex;gap:4px;align-items:center"><input type="checkbox" ${worldCfg.useTitleScreen?'checked':''} onchange="worldCfg.useTitleScreen=this.checked;saveStorage()" style="width:16px"><input type="text" value="${worldCfg.titleHeading||'HYBRID ADVENTURE'}" oninput="worldCfg.titleHeading=this.value;saveStorage()" style="flex:1"></div></div>
+        </div>`;
+    } else {
+      b.innerHTML = `<div style="font-family:monospace;font-size:12px;color:#94a3b8;line-height:1.55">${logs.map(l => `<div>&gt; ${l}</div>`).join("")}</div>`;
+    }
+  }
+
+  /* ==================== SHARED RENDERERS & PHYSICS ==================== */
+  const EPS = 0.01;
+  function overlaps(a, b) {
+    return a.x + EPS < b.x + b.w && a.x + a.w - EPS > b.x && a.y + EPS < b.y + b.h && a.y + a.h - EPS > b.y;
+  }
+
+  function resolveAnimAssetId(n) {
+    if (n.hanging && n.hang_aid) return n.hang_aid;
+    if (!n.grounded && n.grav && n.jump_aid) return n.jump_aid;
+    if (Math.abs(n.vx || 0) > 25 && n.run_aid) return n.run_aid;
+    return n.aid;
+  }
+
+  function emitContinuousParticles(dt) {
+    nodes.forEach(n => {
+      if (destroyQueue.has(n.id) || !n.emitter || n.emitter === "none") return;
+      if (Math.random() > dt * 26) return;
+      const rx = n.x + Math.random() * n.w;
+      const ry = n.y + Math.random() * n.h;
+      if (n.emitter === "fire") {
+        particles.push({ x: rx, y: n.y + n.h * 0.6, vx: (Math.random() - 0.5) * 35, vy: -60 - Math.random() * 60, size: 4, color: Math.random() > 0.4 ? "#f97316" : "#fde047", life: 0.35, maxLife: 0.35 });
+      } else if (n.emitter === "sparkle") {
+        particles.push({ x: rx, y: ry, vx: (Math.random() - 0.5) * 30, vy: -25 - Math.random() * 25, size: 3, color: "#38bdf8", life: 0.45, maxLife: 0.45 });
+      } else if (n.emitter === "snow") {
+        particles.push({ x: rx, y: n.y, vx: (Math.random() - 0.5) * 25, vy: 45 + Math.random() * 35, size: 3, color: "#f8fafc", life: 1.1, maxLife: 1.1 });
+      } else if (n.emitter === "rain") {
+        particles.push({ x: rx, y: n.y, vx: -30, vy: 280, size: 2.5, color: "#60a5fa", life: 0.55, maxLife: 0.55 });
+      }
+    });
+  }
+
+  function drawParallaxLayers(ctx, w, h, camX) {
+    const drawLayer = (style, color, speed, baseH, amp) => {
+      if (!style || style === "none") return;
+      ctx.fillStyle = color;
+      const step = style === "city" ? 70 : 120;
+      const shift = ((camX * speed) % step + step) % step;
+      for (let x = -step + shift; x < w + step; x += step) {
+        const idx = Math.floor((x - shift - camX * speed) / step);
+        const hash = Math.abs(Math.sin(idx * 12.9898) * 43758.5453) % 1;
+        const peakH = baseH + hash * amp;
+        if (style === "city") {
+          ctx.fillRect(x, h - peakH, step - 8, peakH);
+        } else if (style === "ruins") {
+          ctx.fillRect(x + 8, h - peakH, 26, peakH);
+          ctx.fillRect(x + 4, h - peakH, 34, 8);
+        } else {
+          ctx.beginPath();
+          ctx.moveTo(x - step * 0.4, h);
+          ctx.lineTo(x + step * 0.5, h - peakH);
+          ctx.lineTo(x + step * 1.4, h);
+          ctx.closePath();
+          ctx.fill();
+        }
+      }
+    };
+    drawLayer(worldCfg.p1Style, worldCfg.p1Color || "#141d2e", worldCfg.p1Speed || 0.22, 130, 95);
+    drawLayer(worldCfg.p2Style, worldCfg.p2Color || "#1c283e", worldCfg.p2Speed || 0.48, 75, 65);
+  }
+
+  function drawGrappleRopes(ctx) {
+    nodes.forEach(n => {
+      if (n.grappleId) {
+        const anc = nodes.find(a => a.id === n.grappleId && !destroyQueue.has(a.id));
+        if (anc) {
+          ctx.strokeStyle = "#38bdf8";
+          ctx.lineWidth = 2.5;
+          ctx.beginPath();
+          ctx.moveTo(n.x + n.w * 0.5, n.y + n.h * 0.35);
+          ctx.lineTo(anc.x + anc.w * 0.5, anc.y + anc.h * 0.5);
+          ctx.stroke();
+        }
+      }
+    });
+  }
+
+  function drawHangAimArc(ctx) {
+    const pl = nodes.find(n => n.tag === "Player");
+    if (!pl || !pl.hanging) return;
+    const hoveredLedge = findLedgeAt(mouse.x, mouse.y, 48);
+    let tx = mouse.x, ty = mouse.y;
+    if (hoveredLedge) {
+      ctx.strokeStyle = "#38bdf8";
+      ctx.lineWidth = 2.5;
+      ctx.strokeRect(hoveredLedge.x - 2, hoveredLedge.y - 2, hoveredLedge.w + 4, hoveredLedge.h + 4);
+      tx = (hoveredLedge.x + hoveredLedge.w * 0.5) < pl.x ? (hoveredLedge.x + hoveredLedge.w - 8) : (hoveredLedge.x + 8);
+      ty = hoveredLedge.y - pl.h * 0.4;
+    }
+    const sx = pl.x + pl.w * 0.5, sy = pl.y + pl.h * 0.5;
+    const dx = tx - sx, dy = ty - sy;
+    const dist = Math.max(40, Math.hypot(dx, dy));
+    const flight_t = Math.max(0.28, Math.min(0.68, dist / 540));
+    const g = worldCfg.gravity || 1150;
+    const vx = dx / flight_t;
+    const vy = (dy - 0.5 * g * flight_t * flight_t) / flight_t;
+
+    ctx.fillStyle = "#38bdf8";
+    for (let i = 1; i <= 14; i++) {
+      const t = (flight_t / 14) * i;
+      ctx.globalAlpha = 1 - (i / 17);
+      ctx.beginPath();
+      ctx.arc(sx + vx * t, sy + vy * t + 0.5 * g * t * t, i === 14 ? 5 : 3, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  function drawDebugOverlay(ctx) {
+    if (!debugSensors) return;
+    ctx.save();
+    ctx.lineWidth = 1.25;
+    ctx.font = "10px monospace";
+    nodes.forEach(n => {
+      if (n.solid) {
+        ctx.strokeStyle = "rgba(16, 185, 129, 0.72)";
+        if (n.tag === "SlopeRight") {
+          ctx.beginPath(); ctx.moveTo(n.x, n.y + n.h); ctx.lineTo(n.x + n.w, n.y); ctx.lineTo(n.x + n.w, n.y + n.h); ctx.closePath(); ctx.stroke();
+        } else if (n.tag === "SlopeLeft") {
+          ctx.beginPath(); ctx.moveTo(n.x, n.y); ctx.lineTo(n.x + n.w, n.y + n.h); ctx.lineTo(n.x, n.y + n.h); ctx.closePath(); ctx.stroke();
+        } else {
+          ctx.strokeRect(n.x, n.y, n.w, n.h);
+        }
+      }
+      if (n.tag === "Player" || n.tag === "Enemy" || n.tag === "Boss") {
+        ctx.fillStyle = "#93c5fd";
+        ctx.fillText(`v(${Math.round(n.vx||0)},${Math.round(n.vy||0)}) g:${n.grounded?1:0} w:${n.inWater?1:0}`, n.x, n.y - 16);
+      }
+      if (n.tag === "Enemy") {
+        const dir = n.flipX ? -1 : 1;
+        const fx = dir > 0 ? (n.x + n.w) : n.x;
+        ctx.strokeStyle = "#fde047";
+        ctx.beginPath(); ctx.moveTo(fx, n.y + n.h - 10); ctx.lineTo(fx + dir * 42, n.y + n.h - 10); ctx.stroke();
+        const probeX = dir > 0 ? (n.x + n.w + 10) : (n.x - 10);
+        const probeY = n.y + n.h + 22;
+        ctx.fillStyle = hasGroundAhead(n, dir) ? "#10b981" : "#ef4444";
+        ctx.beginPath(); ctx.arc(probeX, probeY, 4, 0, Math.PI * 2); ctx.fill();
+      }
+    });
+    ctx.restore();
+  }
+
+  function drawHealthBars(ctx, worldPass, canvasW = 840, canvasH = 520) {
+    if (worldPass) {
+      nodes.forEach(n => {
+        if ((n.tag === "Player" || n.tag === "Enemy") && typeof n.hp === "number") {
+          const max = n.maxHp || (n.tag === "Player" ? 100 : 3);
+          const pct = Math.max(0, Math.min(1, n.hp / max));
+          const bw = Math.max(30, n.w);
+          const bx = n.x + (n.w - bw) * 0.5;
+          const by = n.y - 10;
+          ctx.fillStyle = "rgba(8,10,14,0.85)";
+          ctx.fillRect(bx - 1, by - 1, bw + 2, 6);
+          ctx.fillStyle = n.tag === "Player" ? (pct > 0.35 ? "#10b981" : "#f59e0b") : "#ef4444";
+          ctx.fillRect(bx, by, bw * pct, 4);
+        }
+        if (n.tag === "NPC") {
+          ctx.fillStyle = "#38bdf8";
+          ctx.font = "bold 10px system-ui";
+          ctx.fillText("[E] Talk", n.x - 4, n.y - 6);
+        }
+      });
+    } else {
+      const pl = nodes.find(n => n.tag === "Player");
+      if (pl && typeof pl.hp === "number") {
+        const max = pl.maxHp || 100;
+        const pct = Math.max(0, Math.min(1, pl.hp / max));
+        ctx.fillStyle = "rgba(12,15,23,0.9)";
+        ctx.fillRect(14, 12, 156, 22);
+        ctx.strokeStyle = "#263044";
+        ctx.lineWidth = 1;
+        ctx.strokeRect(14, 12, 156, 22);
+        ctx.fillStyle = pct > 0.35 ? "#10b981" : "#ef4444";
+        ctx.fillRect(17, 15, 150 * pct, 16);
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "bold 11px system-ui";
+        ctx.fillText(`HP ${Math.ceil(pl.hp)} / ${max}`, 24, 27);
+      }
+      // Screen-wide Boss Health Bar at bottom
+      const boss = nodes.find(n => n.tag === "Boss" && !destroyQueue.has(n.id));
+      if (boss && typeof boss.hp === "number") {
+        const max = boss.maxHp || 24;
+        const pct = Math.max(0, Math.min(1, boss.hp / max));
+        const bw = Math.min(460, canvasW - 80);
+        const bx = (canvasW - bw) * 0.5;
+        const by = canvasH - 36;
+        ctx.fillStyle = "rgba(12,15,23,0.92)";
+        ctx.fillRect(bx - 4, by - 18, bw + 8, 32);
+        ctx.strokeStyle = "#ef4444";
+        ctx.strokeRect(bx - 4, by - 18, bw + 8, 32);
+        ctx.fillStyle = "#f87171";
+        ctx.font = "bold 11px system-ui";
+        ctx.fillText(`BOSS: ${boss.name.toUpperCase()}`, bx, by - 5);
+        ctx.fillStyle = "#dc2626";
+        ctx.fillRect(bx, by, bw * pct, 10);
+      }
+    }
+  }
+
+  function drawEntityShape(ctx, n, ts) {
+    if (n.tag === "CrumblePlat" && n.crumbleState === "gone") return;
+    const shakeOff = (n.tag === "CrumblePlat" && n.crumbleState === "shaking") ? (Math.sin(ts * 0.08) * 3) : 0;
+
+    if (n.tag === "WaterZone") {
+      ctx.fillStyle = n.color || "rgba(56,189,248,0.32)";
+      ctx.fillRect(n.x, n.y, n.w, n.h);
+      ctx.fillStyle = "rgba(125,211,252,0.65)";
+      ctx.fillRect(n.x, n.y, n.w, 3);
+      return;
+    }
+    if (n.tag === "BouncePad") {
+      ctx.fillStyle = "#334155";
+      ctx.fillRect(n.x + 4, n.y + 4, n.w - 8, n.h - 4);
+      ctx.fillStyle = n.color || "#f43f5e";
+      ctx.fillRect(n.x, n.y, n.w, 6);
+      return;
+    }
+    if (n.tag === "PowerUp") {
+      const bob = Math.sin(ts * 0.006) * 3;
+      ctx.fillStyle = n.color || "#f59e0b";
+      ctx.beginPath();
+      ctx.arc(n.x + n.w * 0.5, n.y + n.h * 0.5 + bob, n.w * 0.48, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "bold 11px system-ui";
+      ctx.fillText("★", n.x + 5, n.y + 15 + bob);
+      return;
+    }
+    if (n.tag === "SlopeRight") {
+      ctx.fillStyle = n.color;
+      ctx.beginPath();
+      ctx.moveTo(n.x, n.y + n.h);
+      ctx.lineTo(n.x + n.w, n.y);
+      ctx.lineTo(n.x + n.w, n.y + n.h);
+      ctx.closePath();
+      ctx.fill();
+      return;
+    }
+    if (n.tag === "SlopeLeft") {
+      ctx.fillStyle = n.color;
+      ctx.beginPath();
+      ctx.moveTo(n.x, n.y);
+      ctx.lineTo(n.x + n.w, n.y + n.h);
+      ctx.lineTo(n.x, n.y + n.h);
+      ctx.closePath();
+      ctx.fill();
+      return;
+    }
+    if (n.tag === "GrappleAnchor") {
+      const cx = n.x + n.w * 0.5, cy = n.y + n.h * 0.5;
+      ctx.strokeStyle = n.color || "#38bdf8";
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.arc(cx, cy, n.w * 0.42, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.fillStyle = "#ffffff";
+      ctx.beginPath();
+      ctx.arc(cx, cy, 3, 0, Math.PI * 2);
+      ctx.fill();
+      return;
+    }
+    if (n.tag === "Checkpoint") {
+      ctx.fillStyle = "#94a3b8";
+      ctx.fillRect(n.x + 2, n.y, 4, n.h);
+      ctx.fillStyle = n.color;
+      ctx.beginPath();
+      ctx.moveTo(n.x + 6, n.y + 2);
+      ctx.lineTo(n.x + n.w, n.y + 10);
+      ctx.lineTo(n.x + 6, n.y + 18);
+      ctx.closePath();
+      ctx.fill();
+      return;
+    }
+    if (n.tag === "HealthPack") {
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(n.x, n.y, n.w, n.h);
+      ctx.fillStyle = n.color || "#10b981";
+      ctx.fillRect(n.x + n.w * 0.38, n.y + 4, n.w * 0.24, n.h - 8);
+      ctx.fillRect(n.x + 4, n.y + n.h * 0.38, n.w - 8, n.h * 0.24);
+      return;
+    }
+    if (n.tag === "Goal") {
+      const pulse = Math.sin(ts * 0.006) * 3;
+      ctx.fillStyle = "rgba(168,85,247,0.28)";
+      ctx.fillRect(n.x - 3, n.y - 3, n.w + 6, n.h + 6);
+      ctx.fillStyle = n.color || "#a855f7";
+      ctx.fillRect(n.x, n.y, n.w, n.h);
+      ctx.strokeStyle = "#f3e8ff";
+      ctx.lineWidth = 2;
+      ctx.strokeRect(n.x + 4 + pulse * 0.3, n.y + 4 + pulse * 0.3, n.w - 8 - pulse * 0.6, n.h - 8 - pulse * 0.6);
+      return;
+    }
+    ctx.fillStyle = n.color;
+    ctx.fillRect(n.x + shakeOff, n.y, n.w, n.h);
+    if (n.tag === "OneWay" || n.tag === "CrumblePlat") {
+      ctx.fillStyle = "rgba(255,255,255,0.45)";
+      ctx.fillRect(n.x + shakeOff, n.y, n.w, 3);
+    }
+  }
+
+  /* Shared Physics Stepper (Slopes, Bounce Pads, Crumbling Bridges, Water Zones & Grapple) */
+  function stepWorldPhysics(dt) {
+    // Update Crumbling Platforms timers
+    nodes.forEach(o => {
+      if (o.tag === "CrumblePlat") {
+        if (o.crumbleState === "shaking") {
+          o.crumbleTimer -= dt;
+          if (o.crumbleTimer <= 0) {
+            o.crumbleState = "gone";
+            o.solid = false;
+            o.crumbleTimer = 3.0;
+            spawnParticles(o.x + o.w * 0.5, o.y + 8, "#d97706", 12);
+          }
+        } else if (o.crumbleState === "gone") {
+          o.crumbleTimer -= dt;
+          if (o.crumbleTimer <= 0) {
+            o.crumbleState = "solid";
+            o.solid = true;
+          }
+        }
+      }
+    });
+
+    [...nodes].forEach(n => {
+      if (destroyQueue.has(n.id)) return;
+      if (n.dashing) {
+        dashGhosts.push({ x: n.x, y: n.y, w: n.w, h: n.h, color: n.color, life: 0.18, maxLife: 0.18 });
+      }
+      if (n.life > 0) {
+        n.life -= dt;
+        if (n.life <= 0) { queueDestroy(n.id); return; }
+      }
+
+      if (n.grounded && n.onPlatformId) {
+        const plat = nodes.find(p => p.id === n.onPlatformId && !destroyQueue.has(p.id));
+        if (plat && plat.vx) n.x += plat.vx * dt;
+      }
+
+      n.inWater = !!nodes.find(w => w.tag === "WaterZone" && !destroyQueue.has(w.id) && overlaps(n, w));
+
+      if (n.grav) {
+        const gScale = n.inWater ? 0.28 : 1.0;
+        n.vy = (n.vy || 0) + (worldCfg.gravity || 1150) * gScale * dt;
+        if (n.inWater && n.vy > 140) n.vy = 140;
+        n.grounded = false;
+        n.onPlatformId = null;
+        n.onSlope = false;
+      }
+      n.wallLeft = false;
+      n.wallRight = false;
+
+      // X-axis movement + solid wall collision
+      n.x += (n.vx || 0) * dt;
+      if (n.solid) {
+        nodes.forEach(o => {
+          if (o.id !== n.id && !destroyQueue.has(o.id) && o.solid && o.tag !== "OneWay" && o.tag !== "CrumblePlat" && o.tag !== "SlopeLeft" && o.tag !== "SlopeRight" && overlaps(n, o)) {
+            if ((n.vx || 0) > 0) { n.x = o.x - n.w; n.wallRight = true; }
+            else if ((n.vx || 0) < 0) { n.x = o.x + o.w; n.wallLeft = true; }
+            n.vx = 0;
+          }
+        });
+        if (!n.wallLeft && !n.wallRight && !n.grounded) {
+          nodes.forEach(o => {
+            if (o.id !== n.id && !destroyQueue.has(o.id) && o.solid && o.tag !== "OneWay" && o.tag !== "CrumblePlat" && o.tag !== "SlopeLeft" && o.tag !== "SlopeRight") {
+              if (n.y + 4 < o.y + o.h && n.y + n.h - 4 > o.y) {
+                if (Math.abs((n.x + n.w) - o.x) <= 2) n.wallRight = true;
+                if (Math.abs(n.x - (o.x + o.w)) <= 2) n.wallLeft = true;
+              }
+            }
+          });
+        }
+      }
+
+      // Y-axis movement + Bounce Pads + Crumble Bridges + Slopes + Floors
+      const prevBottom = n.y + n.h;
+      n.y += (n.vy || 0) * dt;
+      if (n.solid) {
+        nodes.forEach(o => {
+          if (o.id !== n.id && !destroyQueue.has(o.id) && o.solid && overlaps(n, o)) {
+            if (o.tag === "BouncePad" && (n.vy || 0) >= 0) {
+              n.y = o.y - n.h;
+              n.vy = -740;
+              n.grounded = false;
+              spawnParticles(o.x + o.w * 0.5, o.y, "#f43f5e", 14);
+              playSfx("bounce");
+            } else if (o.tag === "SlopeRight" || o.tag === "SlopeLeft") {
+              const footX = n.x + n.w * 0.5;
+              const t = Math.max(0, Math.min(1, (footX - o.x) / o.w));
+              const surfaceY = o.tag === "SlopeRight"
+                ? (o.y + o.h - t * o.h)
+                : (o.y + t * o.h);
+              if ((n.vy || 0) >= 0 && (n.y + n.h) >= surfaceY - 4) {
+                n.y = surfaceY - n.h;
+                n.vy = 0;
+                n.grounded = true;
+                n.onSlope = true;
+              }
+            } else if (o.tag === "OneWay" || o.tag === "CrumblePlat") {
+              if ((n.vy || 0) > 0 && prevBottom <= o.y + 6) {
+                n.y = o.y - n.h;
+                n.vy = 0;
+                n.grounded = true;
+                n.onPlatformId = o.id;
+                if (o.tag === "CrumblePlat" && (!o.crumbleState || o.crumbleState === "solid")) {
+                  o.crumbleState = "shaking";
+                  o.crumbleTimer = 0.6;
+                }
+              }
+            } else if ((n.vy || 0) > 0) {
+              n.y = o.y - n.h;
+              n.vy = 0;
+              n.grounded = true;
+              n.onPlatformId = o.id;
+            } else if ((n.vy || 0) < 0) {
+              n.y = o.y + o.h;
+              n.vy = 0;
+            }
+          }
+        });
+      }
+
+      // Grapple Rope Pendulum Constraint
+      if (n.grappleId) {
+        const anc = nodes.find(a => a.id === n.grappleId && !destroyQueue.has(a.id));
+        if (!anc) {
+          n.grappleId = null;
+        } else {
+          const ax = anc.x + anc.w * 0.5, ay = anc.y + anc.h * 0.5;
+          const cx = n.x + n.w * 0.5, cy = n.y + n.h * 0.5;
+          const dx = cx - ax, dy = cy - ay;
+          const dist = Math.hypot(dx, dy);
+          const maxL = n.grappleLen || 140;
+          if (dist > maxL && dist > 0.001) {
+            const nx = dx / dist, ny = dy / dist;
+            n.x = ax + nx * maxL - n.w * 0.5;
+            n.y = ay + ny * maxL - n.h * 0.5;
+            const radialVel = (n.vx || 0) * nx + (n.vy || 0) * ny;
+            if (radialVel > 0) {
+              n.vx -= radialVel * nx;
+              n.vy -= radialVel * ny;
+            }
+          }
+        }
+      }
+
+      if (n.tag === "Bullet" || n.tag === "EnemyBullet") {
+        const hitWall = nodes.find(o => o.id !== n.id && !destroyQueue.has(o.id) && o.solid && o.tag !== "OneWay" && o.tag !== "CrumblePlat" && o.tag !== "Player" && o.tag !== "Enemy" && o.tag !== "Boss" && overlaps(n, o));
+        if (hitWall) {
+          spawnParticles(n.x, n.y, n.tag === "Bullet" ? "#fde047" : "#f43f5e", 6);
+          queueDestroy(n.id);
+        }
+      }
+    });
+    flushDestroyQueue();
+    emitContinuousParticles(dt);
+
+    dashGhosts = dashGhosts.filter(g => { g.life -= dt; return g.life > 0; });
+    particles = particles.filter(p => {
+      p.life -= dt; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 420 * dt;
+      return p.life > 0;
+    });
+    floatingTexts = floatingTexts.filter(ft => {
+      ft.life -= dt; ft.y += ft.vy * dt; ft.vy *= 0.94;
+      return ft.life > 0;
+    });
+  }
+
+  /* Build & Download Standalone Playable 2D HTML Game */
+  function exportStandaloneGame() {
+    const serializedAssets = assets.map(a => ({ id: a.id, name: a.name, cat: a.cat, fps: a.fps, src: a.src, frameSrcs: a.frames.map(im => im.src) }));
+    const gameData = JSON.stringify({ scenes, startScene: curScene, world: worldCfg, sfx: sfxPresets, bgm: bgmCfg, assets: serializedAssets });
+    const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>HybridEngine 2D Game</title><script src="https://cdn.jsdelivr.net/npm/fengari-web@0.1.4/dist/fengari-web.js"><\/script><style>body{margin:0;background:#080a0e;display:grid;place-items:center;height:100vh;overflow:hidden;font-family:system-ui}canvas{background:#0b0f17;border:1px solid #1e2636;max-width:100vw;max-height:100vh}.ov{display:none;position:fixed;inset:0;background:rgba(7,9,13,.86);flex-direction:column;align-items:center;justify-content:center;gap:14px;color:#fff}.ov.open{display:flex}#dlg{display:none;position:fixed;left:24px;right:24px;bottom:20px;background:rgba(12,15,23,.96);border:2px solid #3b82f6;border-radius:10px;padding:14px 18px;color:#fff;flex-direction:column;gap:6px}#dlg.open{display:flex}</style></head><body><canvas id="g" width="840" height="520"></canvas><div id="dlg" onclick="advanceDialogue()"><strong id="dlg-s" style="color:#60a5fa">NPC</strong><div id="dlg-t"></div></div><div id="title" class="ov"><div id="tmain" style="font-size:44px;font-weight:900;color:#60a5fa"></div><div id="tsub" style="color:#cbd5e1"></div><button onclick="dismissTitle()" style="padding:12px 24px;border-radius:6px;border:none;background:#10b981;color:#052e16;font-weight:800;cursor:pointer">▶ START GAME</button></div><div id="go" class="ov"><div style="font-size:44px;font-weight:900;color:#ef4444">GAME OVER</div><div id="gosub" style="color:#cbd5e1">You were defeated!</div><button onclick="location.reload()" style="padding:10px 20px;border-radius:6px;border:none;background:#10b981;color:#052e16;font-weight:800;cursor:pointer">↻ Play Again</button></div><div id="win" class="ov"><div style="font-size:44px;font-weight:900;color:#10b981">LEVEL COMPLETE!</div><div id="winsub" style="color:#cbd5e1">Stage Cleared!</div><button onclick="advanceNextLevel()" style="padding:10px 20px;border-radius:6px;border:none;background:#10b981;color:#052e16;font-weight:800;cursor:pointer">Next Level →</button></div><div id="pause" class="ov"><div style="font-size:44px;font-weight:900;color:#60a5fa">PAUSED</div><button onclick="togglePause()" style="padding:10px 20px;border-radius:6px;border:none;background:#10b981;color:#052e16;font-weight:800;cursor:pointer">▶ Resume (Esc)</button></div><script>
+    const DATA=${gameData}; let cur=DATA.startScene, nodes=DATA.scenes[cur], destroyQueue=new Set(), worldCfg=DATA.world||{gravity:1150,skyTop:"#090d16",skyBot:"#111927"}, sfxPresets=DATA.sfx||{}, bgmCfg=DATA.bgm||{enabled:false,bpm:128,lead:[],bass:[]}, keys={}, gpState={left:false,right:false,up:false,down:false,jump:false,dash:false,slash:false,grapple:false,shoot:false}, mouse={x:0,y:0,down:false,rightDown:false,clicked:false,rightClicked:false}, runners={}, currentDt=0.016, particles=[], dashGhosts=[], floatingTexts=[], shakeTime=0, shakeMag=0, hitstopTimer=0, fadeAlpha=0, pendingScene=null, cam={x:0,y:0,zoom:1}, isGameOver=false, isLevelWon=false, isPaused=false, isTitleOpen=false, audioMuted=false, play=true, dTab="", bgmStep=0, bgmAccum=0, bgmPreviewing=false;
+    const BGM_NOTES=[0,261.63,293.66,329.63,392.00,440.00,523.25,587.33,659.25], BASS_NOTES=[0,130.81,146.83,164.81,196.00,220.00];
+    let dialogueQueue=[], activeDialogue=null, dialogueCharIdx=0, dialogueTimer=0;
+    function queueDialogue(s,t){dialogueQueue.push({speaker:String(s||"NPC"),text:String(t||"")});if(!activeDialogue)advanceDialogue();}
+    function advanceDialogue(){if(activeDialogue&&dialogueCharIdx<activeDialogue.text.length){dialogueCharIdx=activeDialogue.text.length;document.getElementById("dlg-t").textContent=activeDialogue.text;return;}if(dialogueQueue.length>0){activeDialogue=dialogueQueue.shift();dialogueCharIdx=0;dialogueTimer=0;document.getElementById("dlg-s").textContent=activeDialogue.speaker;document.getElementById("dlg-t").textContent="";document.getElementById("dlg").classList.add("open");playSfx("coin");}else{activeDialogue=null;document.getElementById("dlg").classList.remove("open");}}
+    const assets=(DATA.assets||[]).map(ra=>({id:ra.id,cat:ra.cat,fps:ra.fps||6,frames:(ra.frameSrcs||[ra.src]).map(s=>{const im=new Image();im.src=s;return im;})}));
+    const c=document.getElementById("g"), ctx=c.getContext("2d");
+    const EPS=0.01;
+    function dismissTitle(){isTitleOpen=false;document.getElementById("title").classList.remove("open");playSfx("coin");}
+    function triggerGameOver(msg="You were defeated!"){if(isGameOver||isLevelWon)return;isGameOver=true;document.getElementById("gosub").textContent=msg;document.getElementById("go").classList.add("open");playSfx("explosion");}
+    function triggerLevelComplete(msg="Stage Cleared!"){if(isLevelWon||isGameOver)return;isLevelWon=true;document.getElementById("winsub").textContent=msg;document.getElementById("win").classList.add("open");playSfx("coin");}
+    function requestSceneTransition(s){if(DATA.scenes[s]){pendingScene=s;fadeAlpha=0.02;}}
+    function advanceNextLevel(){const ks=Object.keys(DATA.scenes),i=ks.indexOf(cur),ns=i>=0&&i+1<ks.length?ks[i+1]:ks[0];isLevelWon=false;document.getElementById("win").classList.remove("open");switchScene(ns);}
+    function togglePause(){if(isGameOver||isLevelWon||isTitleOpen)return;isPaused=!isPaused;document.getElementById("pause").classList.toggle("open",isPaused);}
+    function queueDestroy(id){if(id!==undefined&&id!==null)destroyQueue.add(id);}
+    function flushDestroyQueue(){if(destroyQueue.size>0){nodes=nodes.filter(n=>!destroyQueue.has(n.id));destroyQueue.clear();}}
+    function overlaps(a,b){return a.x+EPS<b.x+b.w&&a.x+a.w-EPS>b.x&&a.y+EPS<b.y+b.h&&a.y+a.h-EPS>b.y;}
+    function findLedgeAt(mx,my,pad=36){return nodes.find(o=>!destroyQueue.has(o.id)&&o.solid&&(o.tag==="Platform"||o.tag==="OneWay"||o.tag==="Wall")&&mx>=o.x-pad&&mx<=o.x+o.w+pad&&my>=o.y-pad&&my<=o.y+o.h+pad)||null;}
+    function spawnParticles(x,y,color="#fde047",count=10){for(let i=0;i<count;i++){const ang=Math.random()*Math.PI*2,spd=60+Math.random()*220;particles.push({x,y,vx:Math.cos(ang)*spd,vy:Math.sin(ang)*spd-40,size:3+Math.random()*4,color,life:0.25+Math.random()*0.25,maxLife:0.5});}}
+    function spawnDamageText(x,y,text,color="#fde047"){floatingTexts.push({x,y,vy:-58,text:String(text),color,life:0.72,maxLife:0.72});}
+    function triggerShake(mag=6,dur=0.16){shakeMag=Math.max(shakeMag,mag);shakeTime=Math.max(shakeTime,dur);}
+    function triggerHitstop(dur=0.04){hitstopTimer=Math.max(hitstopTimer,Math.min(0.15,dur));}
+    window.addEventListener("keydown",e=>{const k=e.key.toLowerCase();if(["arrowup","arrowdown","arrowleft","arrowright"," "].includes(k))e.preventDefault();if(isTitleOpen&&(k==="enter"||k===" ")){dismissTitle();return;}if(activeDialogue&&(k===" "||k==="e"||k==="enter")){advanceDialogue();return;}if(k==="escape"){togglePause();return;}keys[k]=true;if(e.key===" ")keys["space"]=true;}); window.addEventListener("keyup",e=>{keys[e.key.toLowerCase()]=false;if(e.key===" ")keys["space"]=false;});
+    c.oncontextmenu=e=>e.preventDefault();
+    c.onmousemove=e=>{const r=c.getBoundingClientRect();const sx=c.width/r.width,sy=c.height/r.height;mouse.x=((e.clientX-r.left)*sx-cam.x)/cam.zoom;mouse.y=((e.clientY-r.top)*sy-cam.y)/cam.zoom;}; c.onmousedown=e=>{if(e.button===0){mouse.down=true;mouse.clicked=true;}if(e.button===2){mouse.rightDown=true;mouse.rightClicked=true;}}; window.onmouseup=()=>{mouse.down=false;mouse.rightDown=false;};
+    const hasRealLua = typeof window.fengari !== 'undefined';
+    ${playTone.toString()} ${playSfx.toString()} ${stepBgm.toString()} ${pollGamepads.toString()} ${isInputActive.toString()} ${formatLuaErr.toString()} ${resolveAnimAssetId.toString()} ${emitContinuousParticles.toString()} ${drawParallaxLayers.toString()} ${drawGrappleRopes.toString()} ${drawHealthBars.toString()} ${drawHangAimArc.toString()} ${drawEntityShape.toString()} ${grappleNearest.toString()} ${releaseGrapple.toString()} ${rayHitSolid.toString()} ${hasGroundAhead.toString()} ${runAutonomousParkourAI.toString()} ${stepWorldPhysics.toString()} let audioCtx=null;
+    const logOut=console.log;
+    function switchScene(s){if(DATA.scenes[s]){cur=s;nodes=DATA.scenes[s];boot();}}
+    if(hasRealLua){
+      const L=window.fengari.L, lua=window.fengari.lua, to_luastring=window.fengari.to_luastring, to_jsstring=window.fengari.to_jsstring;
+      const reg=(n,fn)=>{lua.lua_pushcfunction(L,fn);lua.lua_setglobal(L,to_luastring(n));};
+      reg("__hyb_dt",L=>{lua.lua_pushnumber(L,currentDt);return 1;});
+      reg("__hyb_key",L=>{lua.lua_pushboolean(L,isInputActive(to_jsstring(lua.lua_tostring(L,1))));return 1;});
+      reg("__hyb_mouse_x",L=>{lua.lua_pushnumber(L,mouse.x);return 1;}); reg("__hyb_mouse_y",L=>{lua.lua_pushnumber(L,mouse.y);return 1;});
+      reg("__hyb_print",L=>{console.log(to_jsstring(lua.lua_tostring(L,1)));return 0;});
+      reg("__hyb_sound",L=>{playTone(lua.lua_tonumber(L,1)||440,lua.lua_tonumber(L,2)||0.1);return 0;});
+      reg("__hyb_sfx",L=>{playSfx(to_jsstring(lua.lua_tostring(L,1)));return 0;});
+      reg("__hyb_say",L=>{queueDialogue(lua.lua_isstring(L,1)?to_jsstring(lua.lua_tostring(L,1)):"NPC",lua.lua_isstring(L,2)?to_jsstring(lua.lua_tostring(L,2)):"");return 0;});
+      reg("__hyb_cam_zoom",L=>{cam.zoom=Math.max(0.4,Math.min(2.2,lua.lua_tonumber(L,1)||1));return 0;});
+      reg("__hyb_particles",L=>{spawnParticles(lua.lua_tonumber(L,1)||0,lua.lua_tonumber(L,2)||0,lua.lua_isstring(L,3)?to_jsstring(lua.lua_tostring(L,3)):"#fde047",lua.lua_tonumber(L,4)||10);return 0;});
+      reg("__hyb_damage_text",L=>{spawnDamageText(lua.lua_tonumber(L,1)||0,lua.lua_tonumber(L,2)||0,lua.lua_isstring(L,3)?to_jsstring(lua.lua_tostring(L,3)):"-10",lua.lua_isstring(L,4)?to_jsstring(lua.lua_tostring(L,4)):"#fde047");return 0;});
+      reg("__hyb_hitstop",L=>{triggerHitstop(lua.lua_tonumber(L,1)||0.04);return 0;});
+      reg("__hyb_shake",L=>{triggerShake(lua.lua_tonumber(L,1)||6,lua.lua_tonumber(L,2)||0.16);return 0;});
+      reg("__hyb_gameover",L=>{triggerGameOver(lua.lua_isstring(L,1)?to_jsstring(lua.lua_tostring(L,1)):"You were defeated!");return 0;});
+      reg("__hyb_win",L=>{triggerLevelComplete(lua.lua_isstring(L,1)?to_jsstring(lua.lua_tostring(L,1)):"Stage Cleared!");return 0;});
+      reg("__hyb_scene",L=>{requestSceneTransition(to_jsstring(lua.lua_tostring(L,1)));return 0;});
+      reg("__hyb_ledge_at",L=>{const h=findLedgeAt(lua.lua_tonumber(L,1)||0,lua.lua_tonumber(L,2)||0,lua.lua_tonumber(L,3)||36);if(h)lua.lua_pushnumber(L,h.id);else lua.lua_pushnil(L);return 1;});
+      reg("__hyb_grapple_nearest",L=>{const s=nodes.find(x=>x.id===lua.lua_tonumber(L,1));lua.lua_pushboolean(L,grappleNearest(s,lua.lua_tonumber(L,2)||290));return 1;});
+      reg("__hyb_release_grapple",L=>{const s=nodes.find(x=>x.id===lua.lua_tonumber(L,1));releaseGrapple(s);return 0;});
+      reg("__hyb_ai_move",L=>{const s=nodes.find(x=>x.id===lua.lua_tonumber(L,1)&&!destroyQueue.has(x.id)),t=nodes.find(x=>x.id===lua.lua_tonumber(L,2)&&!destroyQueue.has(x.id));if(s&&t)runAutonomousParkourAI(s,t,lua.lua_tonumber(L,3)||135);return 0;});
+      reg("__hyb_ray_wall",L=>{const s=nodes.find(x=>x.id===lua.lua_tonumber(L,1)),d=lua.lua_tonumber(L,2)||1,dist=lua.lua_tonumber(L,3)||40;if(!s){lua.lua_pushboolean(L,false);return 1;}const fx=d>0?(s.x+s.w):s.x;lua.lua_pushboolean(L,!!rayHitSolid(s,fx,s.y+s.h*0.5,fx+d*dist,s.y+s.h*0.5));return 1;});
+      reg("__hyb_ground_ahead",L=>{const s=nodes.find(x=>x.id===lua.lua_tonumber(L,1));lua.lua_pushboolean(L,s?hasGroundAhead(s,lua.lua_tonumber(L,2)||1):false);return 1;});
+      reg("__hyb_get_prop",L=>{const n=nodes.find(x=>x.id===lua.lua_tonumber(L,1)),p=to_jsstring(lua.lua_tostring(L,2));if(!n||n[p]===undefined||n[p]===null){lua.lua_pushnil(L);return 1;}const v=n[p];if(typeof v==="number")lua.lua_pushnumber(L,v);else if(typeof v==="boolean")lua.lua_pushboolean(L,v);else lua.lua_pushstring(L,to_luastring(String(v)));return 1;});
+      reg("__hyb_set_prop",L=>{const n=nodes.find(x=>x.id===lua.lua_tonumber(L,1)),p=to_jsstring(lua.lua_tostring(L,2));if(!n)return 0;const t=lua.lua_type(L,3);if(t===lua.LUA_TNUMBER)n[p]=lua.lua_tonumber(L,3);else if(t===lua.LUA_TBOOLEAN)n[p]=lua.lua_toboolean(L,3);else if(t===lua.LUA_TSTRING)n[p]=to_jsstring(lua.lua_tostring(L,3));return 0;});
+      reg("__hyb_find",L=>{const t=to_jsstring(lua.lua_tostring(L,1)),h=nodes.find(o=>!destroyQueue.has(o.id)&&(o.tag===t||o.name===t));if(h)lua.lua_pushnumber(L,h.id);else lua.lua_pushnil(L);return 1;});
+      reg("__hyb_collides",L=>{const a=nodes.find(x=>x.id===lua.lua_tonumber(L,1)&&!destroyQueue.has(x.id)),t=lua.lua_isstring(L,2)?to_jsstring(lua.lua_tostring(L,2)):null;if(!a){lua.lua_pushnil(L);return 1;}const h=nodes.find(o=>o.id!==a.id&&!destroyQueue.has(o.id)&&(!t||o.tag===t||o.name===t)&&a.x<o.x+o.w&&a.x+a.w>o.x&&a.y<o.y+o.h&&a.y+a.h>o.y);if(h)lua.lua_pushnumber(L,h.id);else lua.lua_pushnil(L);return 1;});
+      reg("__hyb_destroy",L=>{const id=lua.lua_tonumber(L,1);if(id)queueDestroy(id);return 0;});
+      reg("__hyb_spawn",L=>{const tag=to_jsstring(lua.lua_tostring(L,1)),obj={id:Date.now()+Math.random(),name:tag,tag,x:lua.lua_tonumber(L,2)||0,y:lua.lua_tonumber(L,3)||0,w:lua.lua_tonumber(L,4)||12,h:lua.lua_tonumber(L,5)||12,color:lua.lua_isstring(L,6)?to_jsstring(lua.lua_tostring(L,6)):"#f59e0b",aid:null,grav:false,solid:false,flipX:false,vx:lua.lua_tonumber(L,7)||0,vy:lua.lua_tonumber(L,8)||0,grounded:false,wallLeft:false,wallRight:false,hanging:false,dashing:false,text:"",script:"",life:lua.lua_tonumber(L,9)||0};nodes.push(obj);lua.lua_pushnumber(L,obj.id);return 1;});
+    }
+    ${createLuaRunner.toString()}
+    function boot(){runners={};destroyQueue.clear();nodes.forEach(n=>{if(n.script){try{runners[n.id]=createLuaRunner(n.script,n.name,n.id);if(runners[n.id].on_start)runners[n.id].on_start(n);}catch(e){console.error(e);}}});}
+    boot();
+    if(worldCfg.useTitleScreen){isTitleOpen=true;document.getElementById("tmain").textContent=worldCfg.titleHeading||"HYBRID ADVENTURE";document.getElementById("tsub").textContent=worldCfg.titleSub||"Press Start";document.getElementById("title").classList.add("open");}
+    let last=performance.now();
+    function tick(ts){
+      const dt=Math.min(0.05,(ts-last)/1000); last=ts; currentDt=dt;
+      pollGamepads(); stepBgm(dt);
+      if(activeDialogue&&dialogueCharIdx<activeDialogue.text.length){dialogueTimer+=dt;if(dialogueTimer>=0.022){dialogueTimer=0;dialogueCharIdx++;document.getElementById("dlg-t").textContent=activeDialogue.text.slice(0,dialogueCharIdx);}}
+      if(fadeAlpha>0&&pendingScene){fadeAlpha+=dt*2.6;if(fadeAlpha>=1){const next=pendingScene;pendingScene=null;switchScene(next);fadeAlpha=-1;}}else if(fadeAlpha<0){fadeAlpha=Math.min(0,fadeAlpha+dt*2.6);}
+      if(!isGameOver&&!isPaused&&!isLevelWon&&!isTitleOpen&&!activeDialogue){
+        if(hitstopTimer>0){hitstopTimer=Math.max(0,hitstopTimer-dt);}
+        else{
+          [...nodes].forEach(n=>{if(!destroyQueue.has(n.id)&&runners[n.id]&&runners[n.id].on_update)runners[n.id].on_update(n,dt);});
+          flushDestroyQueue();
+          stepWorldPhysics(dt);
+        }
+      }
+      mouse.clicked=false; mouse.rightClicked=false;
+      const grad=ctx.createLinearGradient(0,0,0,c.height);grad.addColorStop(0,worldCfg.skyTop||"#090d16");grad.addColorStop(1,worldCfg.skyBot||"#111927");ctx.fillStyle=grad;ctx.fillRect(0,0,c.width,c.height);
+      const pl=nodes.find(n=>n.tag==="Player");
+      if(pl){const tx=c.width*0.5-(pl.x+pl.w*0.5)*cam.zoom,ty=c.height*0.56-(pl.y+pl.h*0.5)*cam.zoom;cam.x+=(tx-cam.x)*0.12;cam.y+=(ty-cam.y)*0.12;}
+      drawParallaxLayers(ctx,c.width,c.height,cam.x);
+      let sx=0,sy=0;if(shakeTime>0){shakeTime=Math.max(0,shakeTime-dt);sx=(Math.random()-0.5)*2*shakeMag;sy=(Math.random()-0.5)*2*shakeMag;}
+      ctx.save(); ctx.translate(cam.x+sx,cam.y+sy); ctx.scale(cam.zoom,cam.zoom);
+      drawGrappleRopes(ctx);
+      dashGhosts.forEach(g=>{ctx.globalAlpha=(g.life/g.maxLife)*0.45;ctx.fillStyle=g.color;ctx.fillRect(g.x,g.y,g.w,g.h);});ctx.globalAlpha=1;
+      nodes.forEach(n=>{
+        if(n.tag==="Text")return;
+        const a=assets.find(x=>x.id===resolveAnimAssetId(n));
+        if(a&&a.frames.length){const im=a.frames[Math.floor(ts/1000*(a.fps||6))%a.frames.length];ctx.save();if(n.flipX){ctx.translate(n.x+n.w,n.y);ctx.scale(-1,1);ctx.drawImage(im,0,0,n.w,n.h);}else{ctx.drawImage(im,n.x,n.y,n.w,n.h);}ctx.restore();}
+        else drawEntityShape(ctx,n,ts);
+      });
+      particles.forEach(p=>{ctx.globalAlpha=Math.max(0,p.life/p.maxLife);ctx.fillStyle=p.color;ctx.fillRect(p.x-p.size*0.5,p.y-p.size*0.5,p.size,p.size);});ctx.globalAlpha=1;
+      floatingTexts.forEach(ft=>{ctx.globalAlpha=Math.min(1,ft.life/(ft.maxLife*0.4));ctx.fillStyle=ft.color;ctx.font="bold 13px system-ui";ctx.fillText(ft.text,ft.x,ft.y);});ctx.globalAlpha=1;
+      drawHangAimArc(ctx);
+      drawHealthBars(ctx,true,c.width,c.height);
+      ctx.restore();
+      drawHealthBars(ctx,false,c.width,c.height);
+      nodes.forEach(n=>{if(n.tag==="Text"){ctx.fillStyle=n.color;ctx.font="bold 15px system-ui";ctx.fillText(n.text,n.x,n.y+16);}});
+      if(fadeAlpha!==0){ctx.fillStyle=\`rgba(0,0,0,\${Math.abs(fadeAlpha)})\`;ctx.fillRect(0,0,c.width,c.height);}
+      requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+    <\/script></body></html>`;
+    const blob = new Blob([html], { type: "text/html" });
+    const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "HybridEngine_2D_Game.html"; a.click();
+    logOut("[Export] Standalone 2D HTML5 game built & downloaded!");
+  }
+
+  /* ==================== MAIN STUDIO RENDER & RUNTIME LOOP ==================== */
+  let lastT = performance.now();
+  function loop(ts) {
+    const dt = Math.min(0.05, (ts - lastT) / 1000);
+    lastT = ts;
+    currentDt = dt;
+    pollGamepads();
+    stepBgm(dt);
+
+    if (activeDialogue && dialogueCharIdx < activeDialogue.text.length) {
+      dialogueTimer += dt;
+      if (dialogueTimer >= 0.022) {
+        dialogueTimer = 0;
+        dialogueCharIdx++;
+        document.getElementById("dlg-text").textContent = activeDialogue.text.slice(0, dialogueCharIdx);
+      }
+    }
+
+    if (fadeAlpha > 0 && pendingScene) {
+      fadeAlpha += dt * 2.6;
+      if (fadeAlpha >= 1) {
+        const next = pendingScene;
+        pendingScene = null;
+        switchScene(next);
+        fadeAlpha = -1;
+      }
+    } else if (fadeAlpha < 0) {
+      fadeAlpha = Math.min(0, fadeAlpha + dt * 2.6);
+    }
+
+    if (document.getElementById("pxmod").classList.contains("open") && frames.length) {
+      actx.clearRect(0, 0, 112, 112); const fps = Math.max(1, Number(document.getElementById("afps").value) || 6);
+      const g = frames[Math.floor(ts / 1000 * fps) % frames.length], c = 112 / gsz;
+      g.forEach((r, y) => r.forEach((v, x) => { if (v) { actx.fillStyle = v; actx.fillRect(x * c, y * c, c, c); } }));
+    }
+
+    if (play && !isGameOver && !isPaused && !isLevelWon && !isTitleOpen && !activeDialogue) {
+      if (hitstopTimer > 0) {
+        hitstopTimer = Math.max(0, hitstopTimer - dt);
+      } else {
+        [...nodes].forEach(n => {
+          if (!destroyQueue.has(n.id) && luaRunners[n.id] && luaRunners[n.id].on_update) {
+            try { luaRunners[n.id].on_update(n, dt); }
+            catch (e) {
+              if (!errLogged[n.id]) {
+                errLogged[n.id] = true;
+                logOut(`[Lua Runtime Error in ${n.name}.lua] ${formatLuaErr(e)}`);
+              }
+            }
+          }
+        });
+        flushDestroyQueue();
+        stepWorldPhysics(dt);
+      }
+    }
+    mouse.clicked = false;
+    mouse.rightClicked = false;
+
+    const grad = vctx.createLinearGradient(0, 0, 0, vp.height);
+    grad.addColorStop(0, worldCfg.skyTop || "#090d16");
+    grad.addColorStop(1, worldCfg.skyBot || "#111927");
+    vctx.fillStyle = grad;
+    vctx.fillRect(0, 0, vp.width, vp.height);
+
+    if (play && camFollow) {
+      const pl = nodes.find(n => n.tag === "Player");
+      if (pl) {
+        const tx = vp.width * 0.5 - (pl.x + pl.w * 0.5) * cam.zoom;
+        const ty = vp.height * 0.56 - (pl.y + pl.h * 0.5) * cam.zoom;
+        cam.x += (tx - cam.x) * 0.12;
+        cam.y += (ty - cam.y) * 0.12;
+      }
+    }
+
+    drawParallaxLayers(vctx, vp.width, vp.height, cam.x);
+
+    let sx = 0, sy = 0;
+    if (play && shakeTime > 0) {
+      shakeTime = Math.max(0, shakeTime - dt);
+      sx = (Math.random() - 0.5) * 2 * shakeMag;
+      sy = (Math.random() - 0.5) * 2 * shakeMag;
+    }
+
+    vctx.save();
+    vctx.translate(cam.x + sx, cam.y + sy);
+    vctx.scale(cam.zoom, cam.zoom);
+
+    if (!play && worldCfg.showGrid !== false) {
+      vctx.strokeStyle = "#161d2b"; vctx.lineWidth = 1 / cam.zoom;
+      const gStep = tileBrushMode ? 32 : 16;
+      const startX = Math.floor((-cam.x / cam.zoom) / gStep) * gStep;
+      const endX = startX + (vp.width / cam.zoom) + gStep * 2;
+      const startY = Math.floor((-cam.y / cam.zoom) / gStep) * gStep;
+      const endY = startY + (vp.height / cam.zoom) + gStep * 2;
+      for (let x = startX; x < endX; x += gStep) { vctx.beginPath(); vctx.moveTo(x, startY); vctx.lineTo(x, endY); vctx.stroke(); }
+      for (let y = startY; y < endY; y += gStep) { vctx.beginPath(); vctx.moveTo(startX, y); vctx.lineTo(endX, y); vctx.stroke(); }
+    }
+
+    drawGrappleRopes(vctx);
+
+    dashGhosts.forEach(g => {
+      vctx.globalAlpha = (g.life / g.maxLife) * 0.45;
+      vctx.fillStyle = g.color;
+      vctx.fillRect(g.x, g.y, g.w, g.h);
+    });
+    vctx.globalAlpha = 1;
+
+    nodes.forEach(n => {
+      if (n.tag === "Text") return;
+      const activeAid = play ? resolveAnimAssetId(n) : n.aid;
+      const a = assets.find(x => x.id === activeAid);
+      if (a && a.frames.length) {
+        const im = a.frames[Math.floor(ts / 1000 * (a.fps || 6)) % a.frames.length];
+        vctx.save();
+        if (n.flipX) {
+          vctx.translate(n.x + n.w, n.y);
+          vctx.scale(-1, 1);
+          vctx.drawImage(im, 0, 0, n.w, n.h);
+        } else {
+          vctx.drawImage(im, n.x, n.y, n.w, n.h);
+        }
+        vctx.restore();
+      } else {
+        drawEntityShape(vctx, n, ts);
+      }
+
+      if (n.id === sel && !play) {
+        vctx.strokeStyle = "#fde047"; vctx.lineWidth = 2 / cam.zoom; vctx.strokeRect(n.x - 1, n.y - 1, n.w + 2, n.h + 2);
+        const hs = getGizmoHandles(n);
+        const hsSize = 6 / cam.zoom;
+        vctx.fillStyle = "#ffffff";
+        vctx.strokeStyle = "#0f172a";
+        vctx.lineWidth = 1.2 / cam.zoom;
+        hs.forEach(h => {
+          vctx.fillRect(h.x - hsSize * 0.5, h.y - hsSize * 0.5, hsSize, hsSize);
+          vctx.strokeRect(h.x - hsSize * 0.5, h.y - hsSize * 0.5, hsSize, hsSize);
+        });
+      }
+    });
+
+    particles.forEach(p => {
+      vctx.globalAlpha = Math.max(0, p.life / p.maxLife);
+      vctx.fillStyle = p.color;
+      vctx.fillRect(p.x - p.size * 0.5, p.y - p.size * 0.5, p.size, p.size);
+    });
+    vctx.globalAlpha = 1;
+
+    floatingTexts.forEach(ft => {
+      vctx.globalAlpha = Math.min(1, ft.life / (ft.maxLife * 0.4));
+      vctx.fillStyle = ft.color;
+      vctx.font = "bold 13px system-ui";
+      vctx.fillText(ft.text, ft.x, ft.y);
+    });
+    vctx.globalAlpha = 1;
+
+    if (play) {
+      drawHangAimArc(vctx);
+      drawHealthBars(vctx, true, vp.width, vp.height);
+    }
+    drawDebugOverlay(vctx);
+    vctx.restore();
+
+    if (play) drawHealthBars(vctx, false, vp.width, vp.height);
+    nodes.forEach(n => {
+      if (n.tag === "Text") {
+        vctx.fillStyle = n.color;
+        vctx.font = "bold 15px system-ui";
+        vctx.fillText(n.text, n.x, n.y + 16);
+      }
+    });
+
+    if (fadeAlpha !== 0) {
+      vctx.fillStyle = `rgba(0, 0, 0, ${Math.abs(fadeAlpha)})`;
+      vctx.fillRect(0, 0, vp.width, vp.height);
+    }
+
+    requestAnimationFrame(loop);
+  }
+  drawHub(); requestAnimationFrame(loop);
+</script>
+</body></html>
